@@ -108,11 +108,11 @@ export function oobaboogaChatNode(rivet: typeof Rivet) {
       _data: OobaboogaChatNodeData
     ): EditorDefinition<OobaboogaChatNode>[] {
       return [
-        {
-          type: 'string',
-          label: 'Prompt',
-          dataKey: 'prompt',
-        },
+        // {
+        //   type: 'string',
+        //   label: 'Prompt',
+        //   dataKey: 'prompt',
+        // },
       ];
     },
 
@@ -152,7 +152,7 @@ export function oobaboogaChatNode(rivet: typeof Rivet) {
   // PluginNodeDefinition object.
   const oobaboogaChatNode = rivet.pluginNodeDefinition(
     OobaboogaChatNodeImpl,
-    "Example Plugin Node"
+    "Oobabooga Chat Node"
   );
 
   // This definition should then be used in the `register` function of your plugin definition.
