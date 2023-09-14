@@ -1,0 +1,121 @@
+version: 4
+data:
+  attachedData:
+    trivet:
+      testSuites: []
+      version: 1
+  graphs:
+    7NBndWuGj_iFVXwu_xKV5:
+      metadata:
+        description: ""
+        id: 7NBndWuGj_iFVXwu_xKV5
+        name: Load Model
+      nodes:
+        '[_lIx2VTmOLCNY64FiWD1B]:oobaboogaLoadModel "Oobabooga Load Model"':
+          data:
+            model: TheBloke_Phind-CodeLlama-34B-v2-GPTQ
+          visualData: 541.3333129882812/249.33334350585938/300/2
+    LFN0ow4R1PUfa3MQ8dh5U:
+      metadata:
+        description: ""
+        id: LFN0ow4R1PUfa3MQ8dh5U
+        name: Chat Oobabooga
+      nodes:
+        '[3AYWwGLElj50ctXABKPrk]:oobaboogaChat "Oobabooga Chat"':
+          data:
+            add_bos_token: true
+            auto_max_new_tokens: false
+            ban_eos_token: false
+            do_sample: true
+            early_stopping: false
+            epsilon_cutoff: 0
+            eta_cutoff: 0
+            guidance_scale: 1
+            length_penalty: 1
+            max_new_tokens: 2048
+            max_tokens_second: 0
+            min_length: 0
+            mirostat_eta: 0.1
+            mirostat_mode: 0
+            mirostat_tau: 5
+            negative_prompt: ""
+            no_repeat_ngram_size: 0
+            num_beams: 1
+            penalty_alpha: 0
+            preset: None
+            prompt: Tell me a story
+            repetition_penalty: 1.18
+            repetition_penalty_range: 0
+            seed: 1
+            skip_special_tokens: true
+            stopping_strings: []
+            temperature: 1
+            tfs: 1
+            top_a: 0
+            top_k: 40
+            top_p: 1
+            truncation_length: 2048
+            typical_p: 1
+            usePromptInput: true
+          outgoingConnections:
+            - output->"Text" on5AxoJ9FDLxK2A0taG_E/input
+          visualData: 1216.7051600966195/247.00049165602258/300/43
+        '[QA8bzJOZsNToABj_YNumT]:prompt "Prompt"':
+          data:
+            enableFunctionCall: false
+            promptText: Tell me a story
+            type: user
+            useNameInput: false
+            useTypeInput: false
+          outgoingConnections:
+            - output->"Oobabooga Chat" 3AYWwGLElj50ctXABKPrk/prompt
+          visualData: 897.6662684054102/207.72415616153944/250/41
+        '[on5AxoJ9FDLxK2A0taG_E]:text "Text"':
+          data:
+            text: "{{input}}"
+          visualData: 1588.7931380301216/239.0216297293822/502/42
+    TUF1ZXFwuAhygayOhyI9R:
+      metadata:
+        description: ""
+        id: TUF1ZXFwuAhygayOhyI9R
+        name: Loaded Model
+      nodes:
+        '[A8IxHiHxCN42JqRhc7N7J]:compare "Compare"':
+          data:
+            comparisonFunction: ==
+          outgoingConnections:
+            - output->"If" Af5pynwun01ZHbcSXDNwR/if
+            - output->"If" Af5pynwun01ZHbcSXDNwR/value
+          visualData: 1025.6666870117188/308/160/3
+        '[Af5pynwun01ZHbcSXDNwR]:if "If"':
+          outgoingConnections:
+            - output->"Text" XP_3Ka50phkS0kt73wPuc/input
+          visualData: 1360/240/125/null
+        '[XP_3Ka50phkS0kt73wPuc]:text "Text"':
+          data:
+            text: "{{input}}"
+          visualData: 1653/336/300/null
+        '[dGnqCY1St8w8-A6DriPta]:oobaboogaLoadedModel "Oobabooga Loaded Model"':
+          data:
+            model: ""
+            prompt: ""
+          outgoingConnections:
+            - output->"Compare" A8IxHiHxCN42JqRhc7N7J/a
+          visualData: 557/252.66665649414062/390/1
+        '[igO1mvWh3BBWQLvlw8Ytn]:text "Text"':
+          data:
+            text: TheBloke_Phind-CodeLlama-34B-v2-GPTQ
+          outgoingConnections:
+            - output->"Compare" A8IxHiHxCN42JqRhc7N7J/b
+          visualData: 649.6666870117188/418.6666564941406/300/2
+  metadata:
+    description: ""
+    id: NScGxY6S-jyf79Y_8Ga-S
+    title: Untitled Project
+  plugins:
+    - id: oobabooga
+      type: uri
+      uri: http://localhost:3000/bundle.js
+    - id: huggingFace
+      name: huggingFace
+      type: built-in
