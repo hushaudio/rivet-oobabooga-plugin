@@ -1,20 +1,3 @@
-type LoadModelArgs = {
-    loader: string;
-    bf16: boolean;
-    load_in_8bit: boolean;
-    groupsize: number;
-    wbits: number;
-    threads: number;
-    n_batch: number;
-    no_mmap: boolean;
-    mlock: boolean;
-    cache_capacity: null | any;  // Replace 'any' with a more specific type if possible
-    n_gpu_layers: number;
-    n_ctx: number;
-    rwkv_strategy: null | string;
-    rwkv_cuda_on: boolean;
-  };
-
 export default class OobaboogaAPI {
   private HOST: string;
   private URI: string;
@@ -26,42 +9,9 @@ export default class OobaboogaAPI {
   }
 
   // Equivalent to the 'run' function in Python
-  async run(prompt: string): Promise<string> {
-      const request = {
-          prompt,
-          max_new_tokens: 2048,
-          auto_max_new_tokens: false,
-          max_tokens_second: 0,
-          preset: 'None',
-          do_sample: true,
-          temperature: 0.2,
-          top_p: 0.1,
-          typical_p: 1,
-          epsilon_cutoff: 0,
-          eta_cutoff: 0,
-          tfs: 1,
-          top_a: 0,
-          repetition_penalty: 1.18,
-          repetition_penalty_range: 0,
-          top_k: 40,
-          min_length: 0,
-          no_repeat_ngram_size: 0,
-          num_beams: 1,
-          penalty_alpha: 0,
-          length_penalty: 1,
-          early_stopping: false,
-          mirostat_mode: 0,
-          mirostat_tau: 5,
-          mirostat_eta: 0.1,
-          guidance_scale: 1,
-          negative_prompt: '',
-          seed: -1,
-          add_bos_token: true,
-          truncation_length: 2048,
-          ban_eos_token: false,
-          skip_special_tokens: true,
-          stopping_strings: []
-      };
+  async run(prompt: string, props: Partial<ChatRequestSettings> = {}): Promise<string> {
+      const request = Object.assign(defaultChatProps, props, {prompt});
+
       console.log({request});
       
       const response = await fetch(this.URI, {
@@ -127,26 +77,10 @@ export default class OobaboogaAPI {
           return -1;
       };
 
-      //TODO: Still some typings to fix here, make more customizable
       let req = {
           action: 'load',
           model_name: model,
-          args: Object.assign({
-              loader: 'AutoGPTQ',
-              bf16: false,
-              load_in_8bit: false,
-              groupsize: 0,
-              wbits: 0,
-              threads: 0,
-              n_batch: 512,
-              no_mmap: false,
-              mlock: false,
-              cache_capacity: null,
-              n_gpu_layers: 0,
-              n_ctx: 2048,
-              rwkv_strategy: null as null|string,
-              rwkv_cuda_on: false,
-          }, args)
+          args: Object.assign(defaultLoadArgs, args) as LoadModelArgs
       };
 
       model = model.toLowerCase();
@@ -188,4 +122,111 @@ export default class OobaboogaAPI {
 
       return await this.modelApi(req);
   }
+}
+
+
+type LoadModelArgs = {
+    loader: 'AutoGPTQ' | 'Transformers' | 'ExLlama' | 'ExLlama_HF' | 'GPTQ-for-LLaMa' | 'llama.cpp' | 'llamacpp_HF' | 'ctransformers';
+    bf16: boolean;
+    load_in_8bit: boolean;
+    groupsize: number;
+    wbits: number;
+    threads: number;
+    n_batch: number;
+    no_mmap: boolean;
+    mlock: boolean;
+    cache_capacity: null | number;
+    n_gpu_layers: number;
+    n_ctx: number;
+    rwkv_strategy: null | string;
+    rwkv_cuda_on: boolean;
+}
+
+type ChatRequestSettings = {
+    prompt: string;
+    max_new_tokens: number;
+    auto_max_new_tokens: boolean;
+    max_tokens_second: number;
+    preset: string;
+    do_sample: boolean;
+    temperature: number;
+    top_p: number;
+    typical_p: number;
+    epsilon_cutoff: number;
+    eta_cutoff: number;
+    tfs: number;
+    top_a: number;
+    repetition_penalty: number;
+    repetition_penalty_range: number;
+    top_k: number;
+    min_length: number;
+    no_repeat_ngram_size: number;
+    num_beams: number;
+    penalty_alpha: number;
+    length_penalty: number;
+    early_stopping: boolean;
+    mirostat_mode: number;
+    mirostat_tau: number;
+    mirostat_eta: number;
+    guidance_scale: number;
+    negative_prompt: string;
+    seed: number;
+    add_bos_token: boolean;
+    truncation_length: number;
+    ban_eos_token: boolean;
+    skip_special_tokens: boolean;
+    stopping_strings: string[];
+};
+
+const defaultChatProps = {
+    prompt,
+    max_new_tokens: 2048,
+    auto_max_new_tokens: false,
+    max_tokens_second: 0,
+    preset: 'None',
+    do_sample: true,
+    temperature: 0.2,
+    top_p: 0.1,
+    typical_p: 1,
+    epsilon_cutoff: 0,
+    eta_cutoff: 0,
+    tfs: 1,
+    top_a: 0,
+    repetition_penalty: 1.18,
+    repetition_penalty_range: 0,
+    top_k: 40,
+    min_length: 0,
+    no_repeat_ngram_size: 0,
+    num_beams: 1,
+    penalty_alpha: 0,
+    length_penalty: 1,
+    early_stopping: false,
+    mirostat_mode: 0,
+    mirostat_tau: 5,
+    mirostat_eta: 0.1,
+    guidance_scale: 1,
+    negative_prompt: '',
+    seed: -1,
+    add_bos_token: true,
+    truncation_length: 2048,
+    ban_eos_token: false,
+    skip_special_tokens: true,
+    stopping_strings: []
+}
+  
+const defaultLoadArgs = {
+    loader: 'AutoGPTQ',
+    bf16: false,
+    load_in_8bit: false,
+    groupsize: 0,
+    wbits: 0,
+    threads: 0,
+    n_batch: 512,
+    no_mmap: false,
+    mlock: false,
+    cache_capacity: null,
+    n_gpu_layers: 0,
+    n_ctx: 2048,
+    rwkv_strategy: null as null|string,
+    rwkv_cuda_on: false,
 }

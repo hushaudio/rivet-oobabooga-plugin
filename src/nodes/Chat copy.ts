@@ -65,6 +65,7 @@ export type OobaboogaChatNodeData = {
   ban_eos_token: boolean;
   skip_special_tokens: boolean;
   stopping_strings: string[];
+  
 };
 
 // Make sure you export functions that take in the Rivet library, so that you do not
@@ -78,9 +79,8 @@ export function oobaboogaChatNode(rivet: typeof Rivet) {
         id: rivet.newId<NodeId>(),
         type: 'oobaboogaChat',
         data: {
-          prompt: 'Make sure you turn off the switch at the bottom to disable the prompt input in order to use this text box!  You will know its working if you see this in the node body.',
+          prompt: '',
           max_new_tokens: 2048,
-          usePromptInput: true,
           auto_max_new_tokens: false,
           max_tokens_second: 0,
           preset: 'None',
@@ -185,102 +185,35 @@ export function oobaboogaChatNode(rivet: typeof Rivet) {
           theme: 'prompt-interpolation',
           useInputToggleDataKey: 'usePromptInput',
         },
-        {
-          type: 'number',
-          label: 'Max New Tokens',
-          dataKey: 'max_new_tokens',
-          min: 0,
-          step: 1,
-        },
-        {
-          type: 'toggle',
-          label: 'Do Sample',
-          dataKey: 'do_sample',
-        },
-        {
-          type: 'number',
-          label: 'Temperature',
-          dataKey: 'temperature',
-          min: 0,
-          step: 0.1,
-          allowEmpty: true,
-        },
-        {
-          type: 'number',
-          label: 'Top P',
-          dataKey: 'top_p',
-          min: 0,
-          step: 0.1,
-          allowEmpty: true,
-        },
-        {
-          type: 'number',
-          label: 'Top K',
-          dataKey: 'top_k',
-          min: 0,
-          step: 1,
-          allowEmpty: true,
-        },
-        {
-          type: 'number',
-          label: 'Num Beams',
-          dataKey: 'num_beams',
-          min: 0,
-          step: 1,
-          allowEmpty: true,
-        },
-        {
-          type: 'toggle',
-          label: 'Early Stopping',
-          dataKey: 'early_stopping',
-        },
-        {
-          type: 'number',
-          label: 'Seed',
-          dataKey: 'seed',
-          allowEmpty: true,
-        }
       ];
     },
-    
 
     // This function returns the body of the node when it is rendered on the graph. You should show
     // what the current data of the node is in some way that is useful at a glance.
     getBody(
       data: OobaboogaChatNodeData
     ): string | NodeBodySpec | NodeBodySpec[] | undefined {
+      console.log({data});
+      
       return `Send chat to Oobabooga API${data.usePromptInput ? "" : "\n\nPrompt: "+rivet.getInputOrData(data, data, 'prompt')} `;
     },
 
+    // This is the main processing function for your node. It can do whatever you like, but it must return
+    // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
+    // must also correspond to the output definitions you defined in the getOutputDefinitions function.
     async process(
       data: OobaboogaChatNodeData,
       inputData: Inputs,
       _context: InternalProcessContext
     ): Promise<Outputs> {
+      console.log({inputData})
       const prompt = rivet.getInputOrData(data, inputData, 'prompt');
-      const max_new_tokens = rivet.getInputOrData(data, inputData, 'max_new_tokens') as any;
-      const do_sample = rivet.getInputOrData(data, inputData, 'do_sample') as any;
-      const temperature = rivet.getInputOrData(data, inputData, 'temperature') as any;
-      const top_p = rivet.getInputOrData(data, inputData, 'top_p') as any;
-      const top_k = rivet.getInputOrData(data, inputData, 'top_k') as any;
-      const num_beams = rivet.getInputOrData(data, inputData, 'num_beams') as any;
-      const early_stopping = rivet.getInputOrData(data, inputData, 'early_stopping') as any;
-      const seed = rivet.getInputOrData(data, inputData, 'seed') as any;
-    
+  
       const api = new OobaboogaAPI(); 
-      let result = await api.run(prompt, {
-        max_new_tokens,
-        do_sample,
-        temperature,
-        top_p,
-        top_k,
-        num_beams,
-        early_stopping,
-        seed
-      }) as string;
-    
-      if (result == null) { result = 'Error'; }
-    
+      let result = await api.run(prompt) as string;
+  
+      if (result == null) { result = 'Error' }
+  
       return {
         ['output' as PortId]: {
           type: 'string',

@@ -5,6 +5,6 @@ esbuild.build({
   bundle: true,
   platform: "neutral",
   target: "es2020",
-  outfile: "dist/bundle.03.js",
+  outfile: "dist/bundle.js",
   format: "esm",
 });

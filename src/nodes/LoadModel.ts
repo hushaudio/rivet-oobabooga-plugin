@@ -48,7 +48,7 @@ export function oobaboogaLoadModelNode(rivet: typeof Rivet) {
         data: {
           model: ''
         },
-        title: 'Oobabooga Model Loader',
+        title: 'Oobabooga Load Model',
         visualData: {
           x: 0,
           y: 0,
@@ -91,9 +91,9 @@ export function oobaboogaLoadModelNode(rivet: typeof Rivet) {
     getUIData(): NodeUIData {
       return {
         group: ['AI', 'Oobabooga'],
-        contextMenuTitle: 'Oobabooga Model Loader',
-        infoBoxTitle: 'Oobabooga Model Loader Node',
-        infoBoxBody: 'Oobabooga Model Loader',
+        contextMenuTitle: 'Oobabooga Load Model',
+        infoBoxTitle: 'Oobabooga Load Model Node',
+        infoBoxBody: 'Oobabooga Model Loader - For this to work correctly you want to first load your model in Oobabooga with working settings, and then save the settings in Oobabooga.  Every time you load that model it will use those settings from then on',
       };
     },
 

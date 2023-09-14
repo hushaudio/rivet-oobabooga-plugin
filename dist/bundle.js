@@ -15,42 +15,8 @@ var OobaboogaAPI = class {
     this.URI = `http://${this.HOST}/api/v1/generate`;
   }
   // Equivalent to the 'run' function in Python
-  async run(prompt) {
-    const request = {
-      prompt,
-      max_new_tokens: 2048,
-      auto_max_new_tokens: false,
-      max_tokens_second: 0,
-      preset: "None",
-      do_sample: true,
-      temperature: 0.2,
-      top_p: 0.1,
-      typical_p: 1,
-      epsilon_cutoff: 0,
-      eta_cutoff: 0,
-      tfs: 1,
-      top_a: 0,
-      repetition_penalty: 1.18,
-      repetition_penalty_range: 0,
-      top_k: 40,
-      min_length: 0,
-      no_repeat_ngram_size: 0,
-      num_beams: 1,
-      penalty_alpha: 0,
-      length_penalty: 1,
-      early_stopping: false,
-      mirostat_mode: 0,
-      mirostat_tau: 5,
-      mirostat_eta: 0.1,
-      guidance_scale: 1,
-      negative_prompt: "",
-      seed: -1,
-      add_bos_token: true,
-      truncation_length: 2048,
-      ban_eos_token: false,
-      skip_special_tokens: true,
-      stopping_strings: []
-    };
+  async run(prompt2, props = {}) {
+    const request = Object.assign(defaultChatProps, props, { prompt: prompt2 });
     console.log({ request });
     const response = await fetch(this.URI, {
       method: "POST",
@@ -65,8 +31,8 @@ var OobaboogaAPI = class {
     }
   }
   // Equivalent to the 'generate' function in Python
-  async generate(prompt, tokens = 200) {
-    const request = { prompt, max_new_tokens: tokens };
+  async generate(prompt2, tokens = 200) {
+    const request = { prompt: prompt2, max_new_tokens: tokens };
     const response = await fetch(`http://${this.HOST}/api/v1/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,22 +75,7 @@ var OobaboogaAPI = class {
     let req = {
       action: "load",
       model_name: model,
-      args: Object.assign({
-        loader: "AutoGPTQ",
-        bf16: false,
-        load_in_8bit: false,
-        groupsize: 0,
-        wbits: 0,
-        threads: 0,
-        n_batch: 512,
-        no_mmap: false,
-        mlock: false,
-        cache_capacity: null,
-        n_gpu_layers: 0,
-        n_ctx: 2048,
-        rwkv_strategy: null,
-        rwkv_cuda_on: false
-      }, args)
+      args: Object.assign(defaultLoadArgs, args)
     };
     model = model.toLowerCase();
     if (model.includes("4bit") || model.includes("gptq") || model.includes("int4")) {
@@ -163,6 +114,57 @@ var OobaboogaAPI = class {
     return await this.modelApi(req);
   }
 };
+var defaultChatProps = {
+  prompt,
+  max_new_tokens: 2048,
+  auto_max_new_tokens: false,
+  max_tokens_second: 0,
+  preset: "None",
+  do_sample: true,
+  temperature: 0.2,
+  top_p: 0.1,
+  typical_p: 1,
+  epsilon_cutoff: 0,
+  eta_cutoff: 0,
+  tfs: 1,
+  top_a: 0,
+  repetition_penalty: 1.18,
+  repetition_penalty_range: 0,
+  top_k: 40,
+  min_length: 0,
+  no_repeat_ngram_size: 0,
+  num_beams: 1,
+  penalty_alpha: 0,
+  length_penalty: 1,
+  early_stopping: false,
+  mirostat_mode: 0,
+  mirostat_tau: 5,
+  mirostat_eta: 0.1,
+  guidance_scale: 1,
+  negative_prompt: "",
+  seed: -1,
+  add_bos_token: true,
+  truncation_length: 2048,
+  ban_eos_token: false,
+  skip_special_tokens: true,
+  stopping_strings: []
+};
+var defaultLoadArgs = {
+  loader: "AutoGPTQ",
+  bf16: false,
+  load_in_8bit: false,
+  groupsize: 0,
+  wbits: 0,
+  threads: 0,
+  n_batch: 512,
+  no_mmap: false,
+  mlock: false,
+  cache_capacity: null,
+  n_gpu_layers: 0,
+  n_ctx: 2048,
+  rwkv_strategy: null,
+  rwkv_cuda_on: false
+};
 
 // src/nodes/Chat.ts
 function oobaboogaChatNode(rivet) {
@@ -173,7 +175,40 @@ function oobaboogaChatNode(rivet) {
         id: rivet.newId(),
         type: "oobaboogaChat",
         data: {
-          prompt: ""
+          prompt: "Make sure you turn off the switch at the bottom to disable the prompt input in order to use this text box!  You will know its working if you see this in the node body.",
+          max_new_tokens: 2048,
+          usePromptInput: true,
+          auto_max_new_tokens: false,
+          max_tokens_second: 0,
+          preset: "None",
+          do_sample: true,
+          temperature: 0.2,
+          top_p: 0.1,
+          typical_p: 1,
+          epsilon_cutoff: 0,
+          eta_cutoff: 0,
+          tfs: 1,
+          top_a: 0,
+          repetition_penalty: 1.18,
+          repetition_penalty_range: 0,
+          top_k: 40,
+          min_length: 0,
+          no_repeat_ngram_size: 0,
+          num_beams: 1,
+          penalty_alpha: 0,
+          length_penalty: 1,
+          early_stopping: false,
+          mirostat_mode: 0,
+          mirostat_tau: 5,
+          mirostat_eta: 0.1,
+          guidance_scale: 1,
+          negative_prompt: "",
+          seed: -1,
+          add_bos_token: true,
+          truncation_length: 2048,
+          ban_eos_token: false,
+          skip_special_tokens: true,
+          stopping_strings: []
         },
         title: "Oobabooga Chat",
         visualData: {
@@ -188,12 +223,14 @@ function oobaboogaChatNode(rivet) {
     // connection, nodes, and project are for advanced use-cases and can usually be ignored.
     getInputDefinitions(data, _connections, _nodes, _project) {
       const inputs = [];
-      inputs.push({
-        id: "prompt",
-        dataType: "string",
-        title: "Prompt",
-        required: true
-      });
+      if (data.usePromptInput) {
+        inputs.push({
+          id: "prompt",
+          dataType: "string",
+          title: "Prompt",
+          required: true
+        });
+      }
       return inputs;
     },
     // This function should return all output ports for your node, given its data, connections, all other nodes, and the project. The
@@ -220,24 +257,96 @@ function oobaboogaChatNode(rivet) {
     getEditors(_data) {
       return [
         {
-          type: "string",
+          type: "code",
           label: "Prompt",
-          dataKey: "prompt"
+          dataKey: "prompt",
+          language: "prompt-interpolation-markdown",
+          theme: "prompt-interpolation",
+          useInputToggleDataKey: "usePromptInput"
+        },
+        {
+          type: "number",
+          label: "Max New Tokens",
+          dataKey: "max_new_tokens",
+          min: 0,
+          step: 1
+        },
+        {
+          type: "toggle",
+          label: "Do Sample",
+          dataKey: "do_sample"
+        },
+        {
+          type: "number",
+          label: "Temperature",
+          dataKey: "temperature",
+          min: 0,
+          step: 0.1,
+          allowEmpty: true
+        },
+        {
+          type: "number",
+          label: "Top P",
+          dataKey: "top_p",
+          min: 0,
+          step: 0.1,
+          allowEmpty: true
+        },
+        {
+          type: "number",
+          label: "Top K",
+          dataKey: "top_k",
+          min: 0,
+          step: 1,
+          allowEmpty: true
+        },
+        {
+          type: "number",
+          label: "Num Beams",
+          dataKey: "num_beams",
+          min: 0,
+          step: 1,
+          allowEmpty: true
+        },
+        {
+          type: "toggle",
+          label: "Early Stopping",
+          dataKey: "early_stopping"
+        },
+        {
+          type: "number",
+          label: "Seed",
+          dataKey: "seed",
+          allowEmpty: true
         }
       ];
     },
     // This function returns the body of the node when it is rendered on the graph. You should show
     // what the current data of the node is in some way that is useful at a glance.
     getBody(data) {
-      return `Send chat to Oobabooga API`;
+      return `Send chat to Oobabooga API${data.usePromptInput ? "" : "\n\nPrompt: " + rivet.getInputOrData(data, data, "prompt")} `;
     },
-    // This is the main processing function for your node. It can do whatever you like, but it must return
-    // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
-    // must also correspond to the output definitions you defined in the getOutputDefinitions function.
     async process(data, inputData, _context) {
-      const prompt = rivet.getInputOrData(data, inputData, "prompt");
+      const prompt2 = rivet.getInputOrData(data, inputData, "prompt");
+      const max_new_tokens = rivet.getInputOrData(data, inputData, "max_new_tokens");
+      const do_sample = rivet.getInputOrData(data, inputData, "do_sample");
+      const temperature = rivet.getInputOrData(data, inputData, "temperature");
+      const top_p = rivet.getInputOrData(data, inputData, "top_p");
+      const top_k = rivet.getInputOrData(data, inputData, "top_k");
+      const num_beams = rivet.getInputOrData(data, inputData, "num_beams");
+      const early_stopping = rivet.getInputOrData(data, inputData, "early_stopping");
+      const seed = rivet.getInputOrData(data, inputData, "seed");
       const api2 = new OobaboogaAPI();
-      let result = await api2.run(prompt);
+      let result = await api2.run(prompt2, {
+        max_new_tokens,
+        do_sample,
+        temperature,
+        top_p,
+        top_k,
+        num_beams,
+        early_stopping,
+        seed
+      });
       if (result == null) {
         result = "Error";
       }
@@ -251,7 +360,7 @@ function oobaboogaChatNode(rivet) {
   };
   const oobaboogaChatNode2 = rivet.pluginNodeDefinition(
     OobaboogaChatNodeImpl,
-    "Example Plugin Node"
+    "Oobabooga Chat Node"
   );
   return oobaboogaChatNode2;
 }
@@ -353,7 +462,7 @@ function oobaboogaLoadModelNode(rivet) {
         data: {
           model: ""
         },
-        title: "Oobabooga Model Loader",
+        title: "Oobabooga Load Model",
         visualData: {
           x: 0,
           y: 0,
@@ -383,9 +492,9 @@ function oobaboogaLoadModelNode(rivet) {
     getUIData() {
       return {
         group: ["AI", "Oobabooga"],
-        contextMenuTitle: "Oobabooga Model Loader",
-        infoBoxTitle: "Oobabooga Model Loader Node",
-        infoBoxBody: "Oobabooga Model Loader"
+        contextMenuTitle: "Oobabooga Load Model",
+        infoBoxTitle: "Oobabooga Load Model Node",
+        infoBoxBody: "Oobabooga Model Loader - For this to work correctly you want to first load your model in Oobabooga with working settings, and then save the settings in Oobabooga.  Every time you load that model it will use those settings from then on"
       };
     },
     // This function defines all editors that appear when you edit your node.
