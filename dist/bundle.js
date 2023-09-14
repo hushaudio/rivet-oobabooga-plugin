@@ -236,8 +236,8 @@ function oobaboogaChatNode(rivet) {
     // must also correspond to the output definitions you defined in the getOutputDefinitions function.
     async process(data, inputData, _context) {
       const prompt = rivet.getInputOrData(data, inputData, "prompt");
-      const api = new OobaboogaAPI();
-      let result = await api.run(prompt);
+      const api2 = new OobaboogaAPI();
+      let result = await api2.run(prompt);
       if (result == null) {
         result = "Error";
       }
@@ -254,6 +254,192 @@ function oobaboogaChatNode(rivet) {
     "Example Plugin Node"
   );
   return oobaboogaChatNode2;
+}
+
+// src/nodes/LoadedModel.ts
+function oobaboogaLoadedModelNode(rivet) {
+  const OobaboogaLoadedModelNodeImpl = {
+    // This should create a new instance of your node type from scratch.
+    create() {
+      const node = {
+        id: rivet.newId(),
+        type: "oobaboogaLoadedModel",
+        data: {
+          model: "",
+          prompt: ""
+        },
+        title: "Oobabooga Loaded Model",
+        visualData: {
+          x: 0,
+          y: 0,
+          width: 300
+        }
+      };
+      return node;
+    },
+    // This function should return all input ports for your node, given its data, connections, all other nodes, and the project. The
+    // connection, nodes, and project are for advanced use-cases and can usually be ignored.
+    getInputDefinitions(data, _connections, _nodes, _project) {
+      const inputs = [];
+      return inputs;
+    },
+    // This function should return all output ports for your node, given its data, connections, all other nodes, and the project. The
+    // connection, nodes, and project are for advanced use-cases and can usually be ignored.
+    getOutputDefinitions(_data, _connections, _nodes, _project) {
+      return [
+        {
+          id: "output",
+          dataType: "string",
+          title: "Model Name"
+        }
+      ];
+    },
+    // This returns UI information for your node, such as how it appears in the context menu.
+    getUIData() {
+      return {
+        group: ["AI", "Oobabooga"],
+        contextMenuTitle: "Oobabooga Loaded Model",
+        infoBoxTitle: "Oobabooga Loaded Model Node",
+        infoBoxBody: "Oobabooga Loaded Model"
+      };
+    },
+    // This function defines all editors that appear when you edit your node.
+    getEditors(_data) {
+      return [];
+    },
+    // This function returns the body of the node when it is rendered on the graph. You should show
+    // what the current data of the node is in some way that is useful at a glance.
+    getBody(data) {
+      return `Fetch Currently Loaded Model`;
+    },
+    // This is the main processing function for your node. It can do whatever you like, but it must return
+    // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
+    // must also correspond to the output definitions you defined in the getOutputDefinitions function.
+    async process(data, inputData, _context) {
+      const api2 = new OobaboogaAPI();
+      let info = await api2.currentModelInfo();
+      if (info?.result == null) {
+        return {
+          ["output"]: {
+            type: "string",
+            value: "error: result was null"
+          }
+        };
+      }
+      return {
+        ["output"]: {
+          type: "string",
+          value: info.result.model_name
+        }
+      };
+    }
+  };
+  const oobaboogaLoadedModelNode2 = rivet.pluginNodeDefinition(
+    OobaboogaLoadedModelNodeImpl,
+    "Example Plugin Node"
+  );
+  return oobaboogaLoadedModelNode2;
+}
+
+// src/nodes/LoadModel.ts
+var api = new OobaboogaAPI();
+function oobaboogaModelLoaderNode(rivet) {
+  const OobaboogaModelLoaderNodeImpl = {
+    // This should create a new instance of your node type from scratch.
+    create() {
+      const node = {
+        id: rivet.newId(),
+        type: "oobaboogaModelLoader",
+        data: {
+          model: ""
+        },
+        title: "Oobabooga Model Loader",
+        visualData: {
+          x: 0,
+          y: 0,
+          width: 300
+        }
+      };
+      return node;
+    },
+    // This function should return all input ports for your node, given its data, connections, all other nodes, and the project. The
+    // connection, nodes, and project are for advanced use-cases and can usually be ignored.
+    getInputDefinitions(data, _connections, _nodes, _project) {
+      const inputs = [];
+      return inputs;
+    },
+    // This function should return all output ports for your node, given its data, connections, all other nodes, and the project. The
+    // connection, nodes, and project are for advanced use-cases and can usually be ignored.
+    getOutputDefinitions(_data, _connections, _nodes, _project) {
+      return [
+        {
+          id: "output",
+          dataType: "boolean",
+          title: "Success"
+        }
+      ];
+    },
+    // This returns UI information for your node, such as how it appears in the context menu.
+    getUIData() {
+      return {
+        group: ["AI", "Oobabooga"],
+        contextMenuTitle: "Oobabooga Model Loader",
+        infoBoxTitle: "Oobabooga Model Loader Node",
+        infoBoxBody: "Oobabooga Model Loader"
+      };
+    },
+    // This function defines all editors that appear when you edit your node.
+    async getEditors() {
+      const data = await api.listModels();
+      return [
+        {
+          type: "dropdown",
+          label: "Model",
+          dataKey: "model",
+          options: data.map((model) => ({ value: model, label: model }))
+        }
+      ];
+    },
+    // This function returns the body of the node when it is rendered on the graph. You should show
+    // what the current data of the node is in some way that is useful at a glance.
+    getBody(data) {
+      return `Load Oobabooga Model: ${data?.model || "none"}`;
+    },
+    // This is the main processing function for your node. It can do whatever you like, but it must return
+    // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
+    // must also correspond to the output definitions you defined in the getOutputDefinitions function.
+    async process(data, inputData, _context) {
+      const model = rivet.getInputOrData(data, inputData, "model");
+      if (!model)
+        return {
+          ["output"]: {
+            type: "boolean",
+            value: true
+          }
+        };
+      const api2 = new OobaboogaAPI();
+      let result = await api2.loadModel(model);
+      if (result == null) {
+        return {
+          ["output"]: {
+            type: "boolean",
+            value: false
+          }
+        };
+      }
+      return {
+        ["output"]: {
+          type: "boolean",
+          value: true
+        }
+      };
+    }
+  };
+  const oobaboogaModelLoaderNode2 = rivet.pluginNodeDefinition(
+    OobaboogaModelLoaderNodeImpl,
+    "Example Plugin Node"
+  );
+  return oobaboogaModelLoaderNode2;
 }
 
 // src/index.ts
@@ -284,6 +470,8 @@ var plugin = (rivet) => {
     ],
     register(register) {
       register(OobaboogaChatNode);
+      register(oobaboogaModelLoaderNode);
+      register(oobaboogaLoadedModelNode);
     }
   };
   return oobaboogaPlugin;

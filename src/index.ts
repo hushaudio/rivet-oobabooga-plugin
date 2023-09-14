@@ -1,7 +1,7 @@
 import type { RivetPlugin, RivetPluginInitializer } from "@ironclad/rivet-core";
 import { oobaboogaChatNode } from './nodes/Chat';
-// import { oobaboogaLoadedModelNode } from './nodes/CurrentOobaboogaModel.js';
-// import { oobaboogaModelLoaderNode } from './nodes/LoadOobabooga.js';
+import { oobaboogaLoadedModelNode } from './nodes/LoadedModel';
+import { oobaboogaModelLoaderNode } from './nodes/LoadModel';
 
 const plugin: RivetPluginInitializer = (rivet) => {
   // Initialize any nodes in here in the same way, by passing them the Rivet library.
@@ -35,8 +35,8 @@ const plugin: RivetPluginInitializer = (rivet) => {
 
     register(register:any) {
       register(OobaboogaChatNode);
-      // register(oobaboogaModelLoaderNode);
-      // register(oobaboogaLoadedModelNode);
+      register(oobaboogaModelLoaderNode);
+      register(oobaboogaLoadedModelNode);
     },
   };
 
