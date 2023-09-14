@@ -7,20 +7,36 @@ data:
   graphs:
     7NBndWuGj_iFVXwu_xKV5:
       metadata:
-        description: ""
+        description: This simple node loads a model into the oobabooga system
         id: 7NBndWuGj_iFVXwu_xKV5
         name: Load Model
       nodes:
+        '[77i5R9jhzv3NGkqxhd43t]:comment "Comment"':
+          data:
+            backgroundColor: rgba(0,0,0,0.05)
+            color: rgba(255,255,255,1)
+            height: 236
+            text: Load model into Oobabooga.  This is great for when you need to switch
+              tasks to another model
+          visualData: 176/107/566/null
         '[_lIx2VTmOLCNY64FiWD1B]:oobaboogaLoadModel "Oobabooga Load Model"':
           data:
             model: TheBloke_Phind-CodeLlama-34B-v2-GPTQ
-          visualData: 541.3333129882812/249.33334350585938/300/2
+          visualData: 195.99993896484375/188.6666717529297/300/5
     LFN0ow4R1PUfa3MQ8dh5U:
       metadata:
-        description: ""
+        description: This is an example of how you can chat with your local installation
+          of oobabooga use the oobabooga chat node from AudioSaucery
         id: LFN0ow4R1PUfa3MQ8dh5U
         name: Chat Oobabooga
       nodes:
+        '[2cvTxniSNkolFxruSzjPq]:comment "Comment"':
+          data:
+            backgroundColor: rgba(0,0,0,0.05)
+            color: rgba(255,255,255,1)
+            height: 320.56124668944597
+            text: Example chat using the Oobabooga Chat Node
+          visualData: 842.9850282028349/293.15189390500456/1293.2168947565065/67
         '[3AYWwGLElj50ctXABKPrk]:oobaboogaChat "Oobabooga Chat"':
           data:
             add_bos_token: true
@@ -59,7 +75,7 @@ data:
             usePromptInput: true
           outgoingConnections:
             - output->"Text" on5AxoJ9FDLxK2A0taG_E/input
-          visualData: 1216.7051600966195/247.00049165602258/300/43
+          visualData: 1180.5062944955173/427.15366982014575/300/68
         '[QA8bzJOZsNToABj_YNumT]:prompt "Prompt"':
           data:
             enableFunctionCall: false
@@ -69,14 +85,15 @@ data:
             useTypeInput: false
           outgoingConnections:
             - output->"Oobabooga Chat" 3AYWwGLElj50ctXABKPrk/prompt
-          visualData: 897.6662684054102/207.72415616153944/250/41
+          visualData: 903.5590765211184/395.45384869701104/250/70
         '[on5AxoJ9FDLxK2A0taG_E]:text "Text"':
           data:
             text: "{{input}}"
-          visualData: 1588.7931380301216/239.0216297293822/502/42
+          visualData: 1507.1349935197143/420.8583985404169/502/69
     TUF1ZXFwuAhygayOhyI9R:
       metadata:
-        description: ""
+        description: "This demonstrates how to use the oobabooga loaded model node to
+          check if the correct model is loaded for a task "
         id: TUF1ZXFwuAhygayOhyI9R
         name: Loaded Model
       nodes:
@@ -90,11 +107,19 @@ data:
         '[Af5pynwun01ZHbcSXDNwR]:if "If"':
           outgoingConnections:
             - output->"Text" XP_3Ka50phkS0kt73wPuc/input
-          visualData: 1360/240/125/null
+          visualData: 1239.0203305126536/313.81808432491346/125/4
+        '[Sje8vRlFQxU9y97h1IUy-]:comment "Comment"':
+          data:
+            backgroundColor: rgba(0,0,0,0.05)
+            color: rgba(255,255,255,1)
+            height: 461.1213664855537
+            text: "This is an example of how to use the Oobabooga Loaded Model Node to check
+              if the correct model is loaded before executing a task "
+          visualData: 532.9723358881736/143.03966719948525/1417.9622572964752/null
         '[XP_3Ka50phkS0kt73wPuc]:text "Text"':
           data:
             text: "{{input}}"
-          visualData: 1653/336/300/null
+          visualData: 1400.788118025331/309.34345390524544/300/5
         '[dGnqCY1St8w8-A6DriPta]:oobaboogaLoadedModel "Oobabooga Loaded Model"':
           data:
             model: ""
@@ -109,13 +134,10 @@ data:
             - output->"Compare" A8IxHiHxCN42JqRhc7N7J/b
           visualData: 649.6666870117188/418.6666564941406/300/2
   metadata:
-    description: ""
+    description: Demostration of how to use the Oobabooga Nodes created by AudioSaucery
     id: NScGxY6S-jyf79Y_8Ga-S
-    title: Untitled Project
+    title: Oobabooga Plugin Demo
   plugins:
     - id: oobabooga
       type: uri
-      uri: http://localhost:3000/bundle.js
-    - id: huggingFace
-      name: huggingFace
-      type: built-in
+      uri: https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet.js
