@@ -343,13 +343,13 @@ function oobaboogaLoadedModelNode(rivet) {
 
 // src/nodes/LoadModel.ts
 var api = new OobaboogaAPI();
-function oobaboogaModelLoaderNode(rivet) {
-  const OobaboogaModelLoaderNodeImpl = {
+function oobaboogaLoadModelNode(rivet) {
+  const OobaboogaLoadModelNodeImpl = {
     // This should create a new instance of your node type from scratch.
     create() {
       const node = {
         id: rivet.newId(),
-        type: "oobaboogaModelLoader",
+        type: "oobaboogaLoadModel",
         data: {
           model: ""
         },
@@ -435,16 +435,18 @@ function oobaboogaModelLoaderNode(rivet) {
       };
     }
   };
-  const oobaboogaModelLoaderNode2 = rivet.pluginNodeDefinition(
-    OobaboogaModelLoaderNodeImpl,
+  const oobaboogaLoadModelNode2 = rivet.pluginNodeDefinition(
+    OobaboogaLoadModelNodeImpl,
     "Example Plugin Node"
   );
-  return oobaboogaModelLoaderNode2;
+  return oobaboogaLoadModelNode2;
 }
 
 // src/index.ts
 var plugin = (rivet) => {
   const OobaboogaChatNode = oobaboogaChatNode(rivet);
+  const OobaboogaLoadModelNode = oobaboogaLoadModelNode(rivet);
+  const OoobaboogaLoadedModelNode = oobaboogaLoadedModelNode(rivet);
   const oobaboogaPlugin = {
     id: "oobabooga",
     name: "Oobabooga API",
@@ -462,16 +464,16 @@ var plugin = (rivet) => {
     //     helperText: 'Create at https://huggingface.co/settings/tokens',
     //   },
     // },
-    contextMenuGroups: [
-      {
-        id: "oobabooga",
-        label: "Oobabooga API"
-      }
-    ],
+    // contextMenuGroups: [
+    //   {
+    //     id: 'oobabooga',
+    //     label: 'Oobabooga API',
+    //   },
+    // ],
     register(register) {
       register(OobaboogaChatNode);
-      register(oobaboogaModelLoaderNode);
-      register(oobaboogaLoadedModelNode);
+      register(OobaboogaLoadModelNode);
+      register(OoobaboogaLoadedModelNode);
     }
   };
   return oobaboogaPlugin;

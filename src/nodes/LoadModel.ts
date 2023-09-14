@@ -25,26 +25,26 @@ import OobaboogaAPI from "../helpers/Oobabooga";
 const api = new OobaboogaAPI()
 
 // This defines the data that your new node will store.
-export type OobaboogaModelLoaderNodeData = {
+export type OobaboogaLoadModelNodeData = {
   model: string;
 };
 
 // This defines your new type of node.
-export type OobaboogaModelLoaderNode = ChartNode<
-  "oobaboogaModelLoader",
-  OobaboogaModelLoaderNodeData
+export type OobaboogaLoadModelNode = ChartNode<
+  "oobaboogaLoadModel",
+  OobaboogaLoadModelNodeData
 >;
 
 // Make sure you export functions that take in the Rivet library, so that you do not
 // import the entire Rivet core library in your plugin.
-export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
+export function oobaboogaLoadModelNode(rivet: typeof Rivet) {
   // This is your main node implementation. It is an object that implements the PluginNodeImpl interface.
-  const OobaboogaModelLoaderNodeImpl: PluginNodeImpl<OobaboogaModelLoaderNode> = {
+  const OobaboogaLoadModelNodeImpl: PluginNodeImpl<OobaboogaLoadModelNode> = {
     // This should create a new instance of your node type from scratch.
-    create(): OobaboogaModelLoaderNode {
-      const node: OobaboogaModelLoaderNode = {
+    create(): OobaboogaLoadModelNode {
+      const node: OobaboogaLoadModelNode = {
         id: rivet.newId<NodeId>(),
-        type: 'oobaboogaModelLoader',
+        type: 'oobaboogaLoadModel',
         data: {
           model: ''
         },
@@ -61,7 +61,7 @@ export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
     // This function should return all input ports for your node, given its data, connections, all other nodes, and the project. The
     // connection, nodes, and project are for advanced use-cases and can usually be ignored.
     getInputDefinitions(
-      data: OobaboogaModelLoaderNodeData,
+      data: OobaboogaLoadModelNodeData,
       _connections: NodeConnection[],
       _nodes: Record<NodeId, ChartNode>,
       _project: Project
@@ -73,7 +73,7 @@ export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
     // This function should return all output ports for your node, given its data, connections, all other nodes, and the project. The
     // connection, nodes, and project are for advanced use-cases and can usually be ignored.
     getOutputDefinitions(
-      _data: OobaboogaModelLoaderNodeData,
+      _data: OobaboogaLoadModelNodeData,
       _connections: NodeConnection[],
       _nodes: Record<NodeId, ChartNode>,
       _project: Project
@@ -98,7 +98,7 @@ export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
     },
 
     // This function defines all editors that appear when you edit your node.
-    async getEditors(): Promise<EditorDefinition<OobaboogaModelLoaderNode>[]> {
+    async getEditors(): Promise<EditorDefinition<OobaboogaLoadModelNode>[]> {
       const data = await api.listModels()
       return [
         {
@@ -113,7 +113,7 @@ export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
     // This function returns the body of the node when it is rendered on the graph. You should show
     // what the current data of the node is in some way that is useful at a glance.
     getBody(
-      data: OobaboogaModelLoaderNodeData
+      data: OobaboogaLoadModelNodeData
     ): string | NodeBodySpec | NodeBodySpec[] | undefined {
       return `Load Oobabooga Model: ${data?.model || "none"}`;
     },
@@ -122,7 +122,7 @@ export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
     // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
     // must also correspond to the output definitions you defined in the getOutputDefinitions function.
     async process(
-      data: OobaboogaModelLoaderNodeData,
+      data: OobaboogaLoadModelNodeData,
       inputData: Inputs,
       _context: InternalProcessContext
     ): Promise<Outputs> {
@@ -158,11 +158,11 @@ export function oobaboogaModelLoaderNode(rivet: typeof Rivet) {
 
   // Once a node is defined, you must pass it to rivet.pluginNodeDefinition, which will return a valid
   // PluginNodeDefinition object.
-  const oobaboogaModelLoaderNode = rivet.pluginNodeDefinition(
-    OobaboogaModelLoaderNodeImpl,
+  const oobaboogaLoadModelNode = rivet.pluginNodeDefinition(
+    OobaboogaLoadModelNodeImpl,
     "Example Plugin Node"
   );
 
   // This definition should then be used in the `register` function of your plugin definition.
-  return oobaboogaModelLoaderNode;
+  return oobaboogaLoadModelNode;
 }

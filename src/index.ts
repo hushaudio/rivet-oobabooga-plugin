@@ -1,11 +1,13 @@
 import type { RivetPlugin, RivetPluginInitializer } from "@ironclad/rivet-core";
 import { oobaboogaChatNode } from './nodes/Chat';
 import { oobaboogaLoadedModelNode } from './nodes/LoadedModel';
-import { oobaboogaModelLoaderNode } from './nodes/LoadModel';
+import { oobaboogaLoadModelNode } from './nodes/LoadModel';
 
 const plugin: RivetPluginInitializer = (rivet) => {
   // Initialize any nodes in here in the same way, by passing them the Rivet library.
   const OobaboogaChatNode = oobaboogaChatNode(rivet);
+  const OobaboogaLoadModelNode = oobaboogaLoadModelNode(rivet);
+  const OoobaboogaLoadedModelNode = oobaboogaLoadedModelNode(rivet);
 
   const oobaboogaPlugin:RivetPlugin = {
     id: 'oobabooga',
@@ -26,17 +28,17 @@ const plugin: RivetPluginInitializer = (rivet) => {
     //   },
     // },
 
-    contextMenuGroups: [
-      {
-        id: 'oobabooga',
-        label: 'Oobabooga API',
-      },
-    ],
+    // contextMenuGroups: [
+    //   {
+    //     id: 'oobabooga',
+    //     label: 'Oobabooga API',
+    //   },
+    // ],
 
     register(register:any) {
       register(OobaboogaChatNode);
-      register(oobaboogaModelLoaderNode);
-      register(oobaboogaLoadedModelNode);
+      register(OobaboogaLoadModelNode);
+      register(OoobaboogaLoadedModelNode);
     },
   };
 
