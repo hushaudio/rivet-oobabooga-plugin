@@ -1,0 +1,19 @@
+{
+  "name": "oobabooga",
+  "packageManager": "yarn@3.5.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b && tsx bundle.ts"
+  },
+  "dependencies": {
+    "@ironclad/rivet-core": "^1.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.2",
+    "tsx": "^3.12.10",
+    "typescript": "^5.2.2"
+  },
+  "volta": {
+    "node": "20.6.1"
+  }
+}
