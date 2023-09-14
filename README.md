@@ -4,5 +4,5 @@
 ## Installation
 To import the plugin, copy this link and paste it in the import box in the plugin section of the rivet project settings.
 ```
-https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/bundle.js
+https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet.js
 ```

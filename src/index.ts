@@ -13,20 +13,20 @@ const plugin: RivetPluginInitializer = (rivet) => {
     id: 'oobabooga',
     name: 'Oobabooga API',
 
-    // configSpec: {
-    //   oobaboogaBaseURL: {
-    //     type: 'string',
-    //     label: 'Oobabooga API URL',
-    //     description: 'Your Oobabooga API Base URL.',
-    //     helperText: 'Create at https://huggingface.co/settings/tokens',
-    //   },
-    //   oobaboogaAPIKey: {
-    //     type: 'string',
-    //     label: 'Base URL',
-    //     description: 'Your Oobabooga API Base URL.',
-    //     helperText: 'Create at https://huggingface.co/settings/tokens',
-    //   },
-    // },
+    configSpec: {
+      // oobaboogaBaseURL: {
+      //   type: 'string',
+      //   label: 'Oobabooga API Token',
+      //   description: 'Your Oobabooga API Token.',
+      //   helperText: 'Create at https://huggingface.co/settings/tokens',
+      // },
+      // oobaboogaAPIKey: {
+      //   type: 'string',
+      //   label: 'Base URL',
+      //   description: 'Your Oobabooga API Base URL.',
+      //   helperText: 'Create at https://huggingface.co/settings/tokens',
+      // },
+    },
 
     // contextMenuGroups: [
     //   {

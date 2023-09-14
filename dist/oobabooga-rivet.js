@@ -7,11 +7,11 @@ var __publicField = (obj, key, value) => {
 
 // src/helpers/Oobabooga.ts
 var OobaboogaAPI = class {
-  constructor() {
+  constructor(host) {
     __publicField(this, "HOST");
     __publicField(this, "URI");
     __publicField(this, "models", []);
-    this.HOST = "localhost:5000";
+    this.HOST = host || "localhost:5000";
     this.URI = `http://${this.HOST}/api/v1/generate`;
   }
   // Equivalent to the 'run' function in Python
@@ -559,20 +559,20 @@ var plugin = (rivet) => {
   const oobaboogaPlugin = {
     id: "oobabooga",
     name: "Oobabooga API",
-    // configSpec: {
-    //   oobaboogaBaseURL: {
-    //     type: 'string',
-    //     label: 'Oobabooga API URL',
-    //     description: 'Your Oobabooga API Base URL.',
-    //     helperText: 'Create at https://huggingface.co/settings/tokens',
-    //   },
-    //   oobaboogaAPIKey: {
-    //     type: 'string',
-    //     label: 'Base URL',
-    //     description: 'Your Oobabooga API Base URL.',
-    //     helperText: 'Create at https://huggingface.co/settings/tokens',
-    //   },
-    // },
+    configSpec: {
+      // oobaboogaBaseURL: {
+      //   type: 'string',
+      //   label: 'Oobabooga API Token',
+      //   description: 'Your Oobabooga API Token.',
+      //   helperText: 'Create at https://huggingface.co/settings/tokens',
+      // },
+      // oobaboogaAPIKey: {
+      //   type: 'string',
+      //   label: 'Base URL',
+      //   description: 'Your Oobabooga API Base URL.',
+      //   helperText: 'Create at https://huggingface.co/settings/tokens',
+      // },
+    },
     // contextMenuGroups: [
     //   {
     //     id: 'oobabooga',

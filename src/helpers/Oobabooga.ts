@@ -3,8 +3,8 @@ export default class OobaboogaAPI {
   private URI: string;
   public models: string[] = []
 
-  constructor() {
-      this.HOST = 'localhost:5000';
+  constructor(host?: string) {
+      this.HOST = host || 'localhost:5000';
       this.URI = `http://${this.HOST}/api/v1/generate`;
   }
 
