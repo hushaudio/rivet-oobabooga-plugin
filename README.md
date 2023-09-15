@@ -10,7 +10,7 @@ https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga
 ## Nodes
 
 ### Chat node
-This is for communicating with Oobabooga.  It calls what every model is loaded with the chosen prompt
+This is for communicating with Oobabooga.  It requests the given prompt from the loaded model.  There are options for setting the temperature and top_p values.  The output is the response from the model.
 
 ### Mode Loader
 this is for loading a model from the oobabooga webui.  It will load the model and then send a success message to the output.
