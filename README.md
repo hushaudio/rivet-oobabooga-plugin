@@ -1,26 +1,42 @@
-# rivet oobabooga plugin
-Iron Clads Rivet Nodes for api integration with oobabooga text generation webui 
+# Rivet Oobabooga Plugin
+Integrate Iron Clads' Rivet with the Oobabooga text generation Web UI.
 
-Rivet: https://github.com/Ironclad/rivet
+- Rivet Repository: [Iron Clads Rivet](https://github.com/Ironclad/rivet)
+
 ## Installation
-To import the plugin, copy this link and paste it in the import box in the plugin section of the rivet project settings.
+Import the plugin using the following CDN link via the Rivet project settings:
+
 ```
 https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet-v1_02.js
 ```
 
-### WARNING
-if you are using wsl2 on windows, you will need to make sure you open up the correct port on the wsl 
+## Usage
+This plugin facilitates communication with the Oobabooga text generation Web UI via its built-in API.
 
-## Nodes in this plugin
+**Note:** Launch Oobabooga with the `--api` flag for integration. For API configuration, see [Oobabooga API Documentation](https://github.com/oobabooga/text-generation-webui#api).
 
-### Chat node
-This is for communicating with Oobabooga.  It requests the given prompt from the loaded model.  There are options for setting the temperature and top_p values.  The output is the response from the model.
+### WSL2 Warning for Windows Users
+If you're using WSL2, ensure the correct port is mapped to your localhost:
 
-### Mode Loader
-this is for loading a model from the oobabooga webui.  It will load the model and then send a success message to the output.
+1. Fetch your WSL2 IP using `ip addr show eth0`.
+2. Forward the port using `netsh`. For port 5000:
+
+```
+netsh interface portproxy add v4tov4 listenport=5000 listenaddress=127.0.0.1 connectport=5000 connectaddress=<Your-WSL2-IP>
+```
+
+## Nodes
+### Chat Node
+Interacts with Oobabooga, submitting a prompt to a loaded model. Allows customization of params like `temperature` and `top_p` and a few more. Returns model response.
+
+### Model Loader
+Loads a model from the Oobabooga Web UI and sends a success message.
 
 ### Loaded Model
-This gets the name of the model (a string) that is name the loaded model.  You can use this to check if the correct model is loaded for the desired task.
+Fetches the name of the currently loaded model. Useful for verification.
 
 ## Demo
-Included in this repo is a demo file that shows the most basic usage of these nodes. 
+This repository includes a demo file illustrating basic node usage.
+
+## Contribute
+Contributions are welcome! Fork the repo and submit PRs. Questions? Contact me (HU$H) on the [Rivet Discord Server](https://discord.gg/zEwFVVpvWE).
