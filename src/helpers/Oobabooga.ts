@@ -12,8 +12,6 @@ export default class OobaboogaAPI {
   async run(prompt: string, props: Partial<ChatRequestSettings> = {}): Promise<string> {
       const request = Object.assign(defaultChatProps, props, {prompt});
 
-      console.log({request});
-      
       const response = await fetch(this.URI, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -179,7 +177,6 @@ type ChatRequestSettings = {
 };
 
 const defaultChatProps = {
-    prompt,
     max_new_tokens: 2048,
     auto_max_new_tokens: false,
     max_tokens_second: 0,

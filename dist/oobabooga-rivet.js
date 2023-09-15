@@ -15,9 +15,8 @@ var OobaboogaAPI = class {
     this.URI = `http://${this.HOST}/api/v1/generate`;
   }
   // Equivalent to the 'run' function in Python
-  async run(prompt2, props = {}) {
-    const request = Object.assign(defaultChatProps, props, { prompt: prompt2 });
-    console.log({ request });
+  async run(prompt, props = {}) {
+    const request = Object.assign(defaultChatProps, props, { prompt });
     const response = await fetch(this.URI, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -31,8 +30,8 @@ var OobaboogaAPI = class {
     }
   }
   // Equivalent to the 'generate' function in Python
-  async generate(prompt2, tokens = 200) {
-    const request = { prompt: prompt2, max_new_tokens: tokens };
+  async generate(prompt, tokens = 200) {
+    const request = { prompt, max_new_tokens: tokens };
     const response = await fetch(`http://${this.HOST}/api/v1/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -115,7 +114,6 @@ var OobaboogaAPI = class {
   }
 };
 var defaultChatProps = {
-  prompt,
   max_new_tokens: 2048,
   auto_max_new_tokens: false,
   max_tokens_second: 0,
@@ -327,7 +325,7 @@ function oobaboogaChatNode(rivet) {
       return `Send chat to Oobabooga API${data.usePromptInput ? "" : "\n\nPrompt: " + rivet.getInputOrData(data, data, "prompt")} `;
     },
     async process(data, inputData, _context) {
-      const prompt2 = rivet.getInputOrData(data, inputData, "prompt");
+      const prompt = rivet.getInputOrData(data, inputData, "prompt");
       const max_new_tokens = rivet.getInputOrData(data, inputData, "max_new_tokens");
       const do_sample = rivet.getInputOrData(data, inputData, "do_sample");
       const temperature = rivet.getInputOrData(data, inputData, "temperature");
@@ -337,7 +335,7 @@ function oobaboogaChatNode(rivet) {
       const early_stopping = rivet.getInputOrData(data, inputData, "early_stopping");
       const seed = rivet.getInputOrData(data, inputData, "seed");
       const api2 = new OobaboogaAPI();
-      let result = await api2.run(prompt2, {
+      let result = await api2.run(prompt, {
         max_new_tokens,
         do_sample,
         temperature,
@@ -560,18 +558,18 @@ var plugin = (rivet) => {
     id: "oobabooga",
     name: "Oobabooga API",
     configSpec: {
-      // oobaboogaBaseURL: {
-      //   type: 'string',
-      //   label: 'Oobabooga API Token',
-      //   description: 'Your Oobabooga API Token.',
-      //   helperText: 'Create at https://huggingface.co/settings/tokens',
-      // },
-      // oobaboogaAPIKey: {
-      //   type: 'string',
-      //   label: 'Base URL',
-      //   description: 'Your Oobabooga API Base URL.',
-      //   helperText: 'Create at https://huggingface.co/settings/tokens',
-      // },
+      oobaboogaAPIKey: {
+        type: "string",
+        label: "Oobabooga API Token",
+        description: "Your Oobabooga API Token.",
+        helperText: "Create at https://huggingface.co/settings/tokens"
+      },
+      oobaboogaBaseURL: {
+        type: "string",
+        label: "Base URL",
+        description: "Your Oobabooga API Base URL.",
+        helperText: "Create at https://huggingface.co/settings/tokens"
+      }
     },
     // contextMenuGroups: [
     //   {

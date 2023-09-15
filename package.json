@@ -8,7 +8,6 @@
     "watch": "run-p watch:tsc watch:esbuild",
     "watch:tsc": "tsc -b -w",
     "watch:esbuild": "tsx bundle.ts --watch",
-    "hotload": "run-p watch:tsc watch:esbuild && run-p watch serve",
     "serve": "serve --config ../serve.json dist"
   },
   "dependencies": {
