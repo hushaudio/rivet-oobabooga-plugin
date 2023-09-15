@@ -5,10 +5,13 @@ Rivet: https://github.com/Ironclad/rivet
 ## Installation
 To import the plugin, copy this link and paste it in the import box in the plugin section of the rivet project settings.
 ```
-https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet.js
+https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet-v1_02.js
 ```
 
-## Nodes
+### WARNING
+if you are using wsl2 on windows, you will need to make sure you open up the correct port on the wsl 
+
+## Nodes in this plugin
 
 ### Chat node
 This is for communicating with Oobabooga.  It requests the given prompt from the loaded model.  There are options for setting the temperature and top_p values.  The output is the response from the model.
