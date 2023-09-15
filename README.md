@@ -11,9 +11,9 @@ https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga
 ```
 
 ## Usage
-This plugin facilitates communication with the Oobabooga text generation Web UI via its built-in API.
+This plugin facilitates communication with the Oobabooga text generation Web UI via its built-in API and click on the "Apply flags/extensions and restart" button.
 
-**Note:** Launch Oobabooga with the `--api` flag for integration. For API configuration, see [Oobabooga API Documentation](https://github.com/oobabooga/text-generation-webui#api).
+**Note:** Launch Oobabooga with the `--api` flag for integration or go to session and tick on API. For API configuration, see [Oobabooga API Documentation](https://github.com/oobabooga/text-generation-webui#api).
 
 ### WSL2 Warning for Windows Users
 If you're using WSL2, ensure the correct port is mapped to your localhost:
