@@ -1,6 +1,7 @@
 # rivet oobabooga plugin
- api integration with oobabooga text generation webui for rivet nodes
+Iron Clads Rivet Nodes for api integration with oobabooga text generation webui 
 
+Rivet: https://github.com/Ironclad/rivet
 ## Installation
 To import the plugin, copy this link and paste it in the import box in the plugin section of the rivet project settings.
 ```
