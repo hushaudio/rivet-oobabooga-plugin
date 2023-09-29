@@ -9,6 +9,9 @@ Version 1.1 is now available. This version includes:
 ### BaseURL Support 
 Settings option for the Oobabooga API base URL. This is useful for users who are serving the api on a different port or host than the default localhost:5000 of v1.02. 
 
+## Model Loader Settings
+You can now specify model all loading settings
+
 ### Unload Model Node
 This node will unload the currently loaded model.  This is great for freeing up memory programatically or when you need to load a LoRA.  
 
