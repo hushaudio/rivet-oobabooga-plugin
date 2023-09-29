@@ -24,7 +24,7 @@ Automatic Model List dropdown.  This has been removed for performance reasons.
 Import the plugin using the following CDN link via the Rivet project settings:
 
 ```
-https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet-v1_02.js
+https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet-v1_1.js
 ```
 
 ## Usage
