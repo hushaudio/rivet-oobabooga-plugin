@@ -8,10 +8,14 @@ Version 1.1 is now available. This version includes:
 
 ### BaseURL Support 
 Settings option for the Oobabooga API base URL. This is useful for users who are serving the api on a different port or host than the default localhost:5000 of v1.02. 
-### Lora Loading
-You can now load loras with your models.
 
-Please note that when you load a model you need to load the LoRA with it, you cannot do them seperately.
+### Unload Model Node
+This node will unload the currently loaded model.  This is great for freeing up memory programatically or when you need to load a LoRA.  
+
+### Lora Loading
+You can now load loras with your models.  Only tested with Llama2 (7b, 13b, 34b)
+
+Please note that when you load a model you need to load the LoRA with it, you cannot do them separately.
 There are also some restrictions when using Llama2, I have needed to unload my Llama 2 models when I change a LoRA and only 1 LoRA works at a time.  Not tested with other models.
 
 ## REMOVED: 
@@ -47,6 +51,9 @@ Loads a model from the Oobabooga Web UI and sends a success message.
 
 ### Loaded Model
 Fetches the name of the currently loaded model. Useful for verification.
+
+### Unload Model
+Unloads the currently loaded model and sends a success message.
 
 ## Demo
 This repository includes a demo file illustrating basic node usage.
