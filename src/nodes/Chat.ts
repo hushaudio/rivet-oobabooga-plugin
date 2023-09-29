@@ -267,8 +267,10 @@ export function oobaboogaChatNode(rivet: typeof Rivet) {
       const early_stopping = rivet.getInputOrData(data, inputData, 'early_stopping') as any;
       const seed = rivet.getInputOrData(data, inputData, 'seed') as any;
     
-      const api = new OobaboogaAPI(); 
-      let result = await api.run(prompt, {
+      const baseUrl = _context.getPluginConfig('oobaboogaBaseURL');
+      const api = new OobaboogaAPI(baseUrl);
+
+      const requestBody = {
         max_new_tokens,
         do_sample,
         temperature,
@@ -277,7 +279,9 @@ export function oobaboogaChatNode(rivet: typeof Rivet) {
         num_beams,
         early_stopping,
         seed
-      }) as string;
+      }
+
+      let result = await api.run(prompt, requestBody) as string;
     
       if (result == null) { result = 'Error'; }
     

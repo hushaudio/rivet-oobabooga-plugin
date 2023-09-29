@@ -5,6 +5,6 @@ esbuild.build({
   bundle: true,
   platform: "neutral",
   target: "es2020",
-  outfile: "dist/oobabooga-rivet-v1_02.js",
+  outfile: "dist/oobabooga-rivet-v1_1.js",
   format: "esm",
 });

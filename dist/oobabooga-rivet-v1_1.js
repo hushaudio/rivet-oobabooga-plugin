@@ -11,8 +11,8 @@ var OobaboogaAPI = class {
     __publicField(this, "HOST");
     __publicField(this, "URI");
     __publicField(this, "models", []);
-    this.HOST = host || "localhost:5000";
-    this.URI = `http://${this.HOST}/api/v1/generate`;
+    this.HOST = host || "http://localhost:5000";
+    this.URI = `${this.HOST}/api/v1/generate`;
   }
   // Equivalent to the 'run' function in Python
   async run(prompt, props = {}) {
@@ -32,7 +32,7 @@ var OobaboogaAPI = class {
   // Equivalent to the 'generate' function in Python
   async generate(prompt, tokens = 200) {
     const request = { prompt, max_new_tokens: tokens };
-    const response = await fetch(`http://${this.HOST}/api/v1/generate`, {
+    const response = await fetch(`${this.HOST}/api/v1/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request)
@@ -45,7 +45,7 @@ var OobaboogaAPI = class {
   }
   // Equivalent to the 'model_api' function in Python
   async modelApi(request) {
-    const response = await fetch(`http://${this.HOST}/api/v1/model`, {
+    const response = await fetch(`${this.HOST}/api/v1/model`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request)
@@ -58,10 +58,7 @@ var OobaboogaAPI = class {
   async listModels() {
     return (await this.modelApi({ action: "list" }))?.result;
   }
-  async loadModel(model_name) {
-    return this.modelApi({ action: "load", model_name });
-  }
-  async complexModelLoad(model, args) {
+  async loadModel(model, args) {
     const guessGroupsize = (model_name) => {
       if (model_name.includes("1024g"))
         return 1024;
@@ -112,6 +109,8 @@ var OobaboogaAPI = class {
     }
     return await this.modelApi(req);
   }
+  async complexModelLoad(model, args) {
+  }
 };
 var defaultChatProps = {
   max_new_tokens: 2048,
@@ -148,9 +147,10 @@ var defaultChatProps = {
   stopping_strings: []
 };
 var defaultLoadArgs = {
-  loader: "AutoGPTQ",
+  loader: "Transformers",
   bf16: false,
   load_in_8bit: false,
+  load_in_4bit: true,
   groupsize: 0,
   wbits: 0,
   threads: 0,
@@ -334,8 +334,9 @@ function oobaboogaChatNode(rivet) {
       const num_beams = rivet.getInputOrData(data, inputData, "num_beams");
       const early_stopping = rivet.getInputOrData(data, inputData, "early_stopping");
       const seed = rivet.getInputOrData(data, inputData, "seed");
-      const api2 = new OobaboogaAPI();
-      let result = await api2.run(prompt, {
+      const baseUrl = _context.getPluginConfig("oobaboogaBaseURL");
+      const api = new OobaboogaAPI(baseUrl);
+      const requestBody = {
         max_new_tokens,
         do_sample,
         temperature,
@@ -344,7 +345,8 @@ function oobaboogaChatNode(rivet) {
         num_beams,
         early_stopping,
         seed
-      });
+      };
+      let result = await api.run(prompt, requestBody);
       if (result == null) {
         result = "Error";
       }
@@ -371,10 +373,7 @@ function oobaboogaLoadedModelNode(rivet) {
       const node = {
         id: rivet.newId(),
         type: "oobaboogaLoadedModel",
-        data: {
-          model: "",
-          prompt: ""
-        },
+        data: {},
         title: "Oobabooga Loaded Model",
         visualData: {
           x: 0,
@@ -395,9 +394,19 @@ function oobaboogaLoadedModelNode(rivet) {
     getOutputDefinitions(_data, _connections, _nodes, _project) {
       return [
         {
-          id: "output",
+          id: "model",
           dataType: "string",
           title: "Model Name"
+        },
+        {
+          id: "loras",
+          dataType: "string",
+          title: "Loras"
+        },
+        {
+          id: "mode",
+          dataType: "string",
+          title: "Mode"
         }
       ];
     },
@@ -423,8 +432,9 @@ function oobaboogaLoadedModelNode(rivet) {
     // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
     // must also correspond to the output definitions you defined in the getOutputDefinitions function.
     async process(data, inputData, _context) {
-      const api2 = new OobaboogaAPI();
-      let info = await api2.currentModelInfo();
+      const baseUrl = _context.getPluginConfig("oobaboogaBaseURL");
+      const api = new OobaboogaAPI(baseUrl);
+      let info = await api.currentModelInfo();
       if (info?.result == null) {
         return {
           ["output"]: {
@@ -434,22 +444,29 @@ function oobaboogaLoadedModelNode(rivet) {
         };
       }
       return {
-        ["output"]: {
+        ["model"]: {
           type: "string",
           value: info.result.model_name
+        },
+        ["loras"]: {
+          type: "string",
+          value: info.result.lora_names
+        },
+        ["mode"]: {
+          type: "string",
+          value: info.result["shared.args"].mode
         }
       };
     }
   };
   const oobaboogaLoadedModelNode2 = rivet.pluginNodeDefinition(
     OobaboogaLoadedModelNodeImpl,
-    "Example Plugin Node"
+    "Oobabooga Loaded Model Node"
   );
   return oobaboogaLoadedModelNode2;
 }
 
 // src/nodes/LoadModel.ts
-var api = new OobaboogaAPI();
 function oobaboogaLoadModelNode(rivet) {
   const OobaboogaLoadModelNodeImpl = {
     // This should create a new instance of your node type from scratch.
@@ -458,9 +475,376 @@ function oobaboogaLoadModelNode(rivet) {
         id: rivet.newId(),
         type: "oobaboogaLoadModel",
         data: {
-          model: ""
+          model: "",
+          loras: "",
+          mode: "instruct",
+          loadIn8Bit: false,
+          loader: "AutoGPTQ",
+          bf16: false,
+          groupsize: 0,
+          wbits: 0,
+          threads: 0,
+          n_batch: 512,
+          no_mmap: false,
+          mlock: false,
+          cache_capacity: null,
+          n_gpu_layers: 0,
+          n_ctx: 2048,
+          rwkv_strategy: null,
+          rwkv_cuda_on: false,
+          load_in_4bit: false,
+          compute_dtype: "float16",
+          quant_type: "nf4",
+          use_double_quant: false,
+          cpu: false,
+          auto_devices: false,
+          gpu_memory: null,
+          cpu_memory: null,
+          disk: false,
+          disk_cache_dir: "cache"
         },
         title: "Oobabooga Load Model",
+        visualData: {
+          x: 0,
+          y: 0,
+          width: 400
+        }
+      };
+      return node;
+    },
+    // This function should return all input ports for your node, given its data, connections, all other nodes, and the project. The
+    // connection, nodes, and project are for advanced use-cases and can usually be ignored.
+    getInputDefinitions(data, _connections, _nodes, _project) {
+      const inputs = [];
+      return inputs;
+    },
+    // This function should return all output ports for your node, given its data, connections, all other nodes, and the project. The
+    // connection, nodes, and project are for advanced use-cases and can usually be ignored.
+    getOutputDefinitions(_data, _connections, _nodes, _project) {
+      return [
+        {
+          id: "output",
+          dataType: "boolean",
+          title: "Success"
+        },
+        {
+          id: "message",
+          dataType: "string",
+          title: "Message"
+        }
+      ];
+    },
+    // This returns UI information for your node, such as how it appears in the context menu.
+    getUIData() {
+      return {
+        group: ["AI", "Oobabooga"],
+        contextMenuTitle: "Oobabooga Load Model",
+        infoBoxTitle: "Oobabooga Load Model Node",
+        infoBoxBody: "Oobabooga Model Loader - For this to work correctly you want to first load your model in Oobabooga with working settings, and then save the settings in Oobabooga.  Every time you load that model it will use those settings from then on"
+      };
+    },
+    // This function defines all editors that appear when you edit your node.
+    getEditors() {
+      return [
+        {
+          type: "string",
+          label: "Model",
+          dataKey: "model"
+        },
+        {
+          type: "string",
+          label: "Loras (comma separated)",
+          dataKey: "loras"
+        },
+        {
+          type: "string",
+          label: "Mode",
+          dataKey: "mode"
+        },
+        {
+          type: "toggle",
+          label: "Load in 8 Bit",
+          dataKey: "loadIn8Bit"
+        },
+        {
+          type: "dropdown",
+          label: "Loader",
+          dataKey: "loader",
+          options: [
+            {
+              value: "AutoGPTQ",
+              label: "AutoGPTQ"
+            },
+            {
+              value: "Transformers",
+              label: "Transformers"
+            },
+            {
+              value: "ExLlama",
+              label: "ExLlama"
+            },
+            {
+              value: "ExLlama_HF",
+              label: "ExLlama_HF"
+            },
+            {
+              value: "GPTQ-for-LLaMa",
+              label: "GPTQ-for-LLaMa"
+            },
+            {
+              value: "llama.cpp",
+              label: "llama.cpp"
+            },
+            {
+              value: "llamacpp_HF",
+              label: "llamacpp_HF"
+            },
+            {
+              value: "ctransformers",
+              label: "ctransformers"
+            }
+          ]
+        },
+        {
+          type: "toggle",
+          label: "Load in 4 Bit",
+          dataKey: "load_in_4bit"
+        },
+        {
+          type: "string",
+          label: "Compute DType",
+          dataKey: "compute_dtype"
+        },
+        {
+          type: "string",
+          label: "Quant Type",
+          dataKey: "quant_type"
+        },
+        {
+          type: "toggle",
+          label: "Use Double Quant",
+          dataKey: "use_double_quant"
+        },
+        {
+          type: "toggle",
+          label: "BF16",
+          dataKey: "bf16"
+        },
+        {
+          type: "number",
+          label: "Group Size",
+          dataKey: "groupsize"
+        },
+        {
+          type: "number",
+          label: "WBits",
+          dataKey: "wbits"
+        },
+        {
+          type: "number",
+          label: "Threads",
+          dataKey: "threads"
+        },
+        {
+          type: "number",
+          label: "N Batch",
+          dataKey: "n_batch"
+        },
+        {
+          type: "toggle",
+          label: "No MMap",
+          dataKey: "no_mmap"
+        },
+        {
+          type: "toggle",
+          label: "MLock",
+          dataKey: "mlock"
+        },
+        {
+          type: "string",
+          label: "Cache Capacity",
+          dataKey: "cache_capacity"
+        },
+        {
+          type: "number",
+          label: "N GPU Layers",
+          dataKey: "n_gpu_layers"
+        },
+        {
+          type: "number",
+          label: "N CTX",
+          dataKey: "n_ctx"
+        },
+        {
+          type: "string",
+          label: "RWKV Strategy",
+          dataKey: "rwkv_strategy"
+        },
+        {
+          type: "toggle",
+          label: "RWKV CUDA On",
+          dataKey: "rwkv_cuda_on"
+        },
+        {
+          type: "toggle",
+          label: "Auto Devices",
+          dataKey: "auto_devices"
+        },
+        {
+          type: "string",
+          label: "GPU Memory",
+          dataKey: "gpu_memory"
+        },
+        {
+          type: "toggle",
+          label: "CPU",
+          dataKey: "cpu"
+        },
+        {
+          type: "string",
+          label: "CPU Memory",
+          dataKey: "cpu_memory"
+        },
+        {
+          type: "toggle",
+          label: "Disk",
+          dataKey: "disk"
+        },
+        {
+          type: "string",
+          label: "Disk Cache Dir",
+          dataKey: "disk_cache_dir"
+        }
+      ];
+    },
+    // This function returns the body of the node when it is rendered on the graph. You should show
+    // what the current data of the node is in some way that is useful at a glance.
+    getBody(data) {
+      return `Load Oobabooga Model: ${data?.model || "none"}`;
+    },
+    // This is the main processing function for your node. It can do whatever you like, but it must return
+    // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
+    // must also correspond to the output definitions you defined in the getOutputDefinitions function.
+    async process(data, inputData, _context) {
+      const model = rivet.getInputOrData(data, inputData, "model");
+      let loras = rivet.getInputOrData(data, inputData, "loras").split(",").map((l) => l.trim()).filter((l) => l !== "");
+      const mode = rivet.getInputOrData(data, inputData, "mode");
+      const load_in_8bit = rivet.getInputOrData(data, inputData, "loadIn8Bit");
+      const loader = rivet.getInputOrData(data, inputData, "loader");
+      const bf16 = rivet.getInputOrData(data, inputData, "bf16");
+      const groupsize = rivet.getInputOrData(data, inputData, "groupsize");
+      const wbits = rivet.getInputOrData(data, inputData, "wbits");
+      const threads = rivet.getInputOrData(data, inputData, "threads");
+      const n_batch = rivet.getInputOrData(data, inputData, "n_batch");
+      const no_mmap = rivet.getInputOrData(data, inputData, "no_mmap");
+      const mlock = rivet.getInputOrData(data, inputData, "mlock");
+      const cache_capacity = rivet.getInputOrData(data, inputData, "cache_capacity");
+      const n_gpu_layers = rivet.getInputOrData(data, inputData, "n_gpu_layers");
+      const n_ctx = rivet.getInputOrData(data, inputData, "n_ctx");
+      const rwkv_strategy = rivet.getInputOrData(data, inputData, "rwkv_strategy");
+      const rwkv_cuda_on = rivet.getInputOrData(data, inputData, "rwkv_cuda_on");
+      const load_in_4bit = rivet.getInputOrData(data, inputData, "load_in_4bit");
+      const compute_dtype = rivet.getInputOrData(data, inputData, "compute_dtype");
+      const quant_type = rivet.getInputOrData(data, inputData, "quant_type");
+      const use_double_quant = rivet.getInputOrData(data, inputData, "use_double_quant");
+      const cpu = rivet.getInputOrData(data, inputData, "cpu");
+      const auto_devices = rivet.getInputOrData(data, inputData, "auto_devices");
+      const gpu_memory = rivet.getInputOrData(data, inputData, "gpu_memory");
+      const cpu_memory = rivet.getInputOrData(data, inputData, "cpu_memory");
+      const disk = rivet.getInputOrData(data, inputData, "disk");
+      const disk_cache_dir = rivet.getInputOrData(data, inputData, "disk_cache_dir");
+      console.log;
+      if (!model && !loras)
+        return {
+          ["output"]: {
+            type: "boolean",
+            value: false
+          }
+        };
+      if (!model && loras)
+        return {
+          ["output"]: {
+            type: "boolean",
+            value: false
+          },
+          ["message"]: {
+            type: "string",
+            value: "You must select a model to a load a LoRA"
+          }
+        };
+      const reqBody = {
+        lora: loras.length > 0 ? loras : [],
+        mode,
+        load_in_8bit: load_in_8bit ? true : false,
+        loader,
+        bf16: bf16 ? true : false,
+        load_in_4bit,
+        groupsize,
+        wbits,
+        threads,
+        n_batch,
+        no_mmap,
+        mlock,
+        cache_capacity,
+        n_gpu_layers,
+        n_ctx,
+        rwkv_strategy,
+        rwkv_cuda_on,
+        compute_dtype,
+        quant_type,
+        use_double_quant,
+        cpu,
+        auto_devices,
+        gpu_memory,
+        cpu_memory,
+        disk,
+        disk_cache_dir
+      };
+      console.log(reqBody);
+      const baseUrl = _context.getPluginConfig("oobaboogaBaseURL");
+      const api = new OobaboogaAPI(baseUrl);
+      let result = await api.loadModel(model, reqBody);
+      if (result == null) {
+        return {
+          ["output"]: {
+            type: "boolean",
+            value: false
+          }
+        };
+      }
+      let message = "Model loaded successfully";
+      if (result?.error?.message) {
+        message = `Error: ${result.error.message}`;
+      }
+      return {
+        ["output"]: {
+          type: "boolean",
+          value: true
+        },
+        ["message"]: {
+          type: "string",
+          value: message
+        }
+      };
+    }
+  };
+  const oobaboogaLoadModelNode2 = rivet.pluginNodeDefinition(
+    OobaboogaLoadModelNodeImpl,
+    "Oobabooga Load Model Node"
+  );
+  return oobaboogaLoadModelNode2;
+}
+
+// src/nodes/UnloadModel.ts
+function oobaboogaUnloadModelNode(rivet) {
+  const OobaboogaUnloadModelNodeImpl = {
+    // This should create a new instance of your node type from scratch.
+    create() {
+      const node = {
+        id: rivet.newId(),
+        type: "oobaboogaUnloadModel",
+        data: {},
+        title: "Oobabooga Unload Model",
         visualData: {
           x: 0,
           y: 0,
@@ -480,7 +864,7 @@ function oobaboogaLoadModelNode(rivet) {
     getOutputDefinitions(_data, _connections, _nodes, _project) {
       return [
         {
-          id: "output",
+          id: "success",
           dataType: "boolean",
           title: "Success"
         }
@@ -490,63 +874,49 @@ function oobaboogaLoadModelNode(rivet) {
     getUIData() {
       return {
         group: ["AI", "Oobabooga"],
-        contextMenuTitle: "Oobabooga Load Model",
-        infoBoxTitle: "Oobabooga Load Model Node",
-        infoBoxBody: "Oobabooga Model Loader - For this to work correctly you want to first load your model in Oobabooga with working settings, and then save the settings in Oobabooga.  Every time you load that model it will use those settings from then on"
+        contextMenuTitle: "Oobabooga Unload Model",
+        infoBoxTitle: "Oobabooga Unload Model Node",
+        infoBoxBody: "Oobabooga Unload Model"
       };
     },
     // This function defines all editors that appear when you edit your node.
-    async getEditors() {
-      const data = await api.listModels();
-      return [
-        {
-          type: "dropdown",
-          label: "Model",
-          dataKey: "model",
-          options: data.map((model) => ({ value: model, label: model }))
-        }
-      ];
+    getEditors(_data) {
+      return [];
     },
     // This function returns the body of the node when it is rendered on the graph. You should show
     // what the current data of the node is in some way that is useful at a glance.
     getBody(data) {
-      return `Load Oobabooga Model: ${data?.model || "none"}`;
+      return `Unload Currently Loaded Model`;
     },
     // This is the main processing function for your node. It can do whatever you like, but it must return
     // a valid Outputs object, which is a map of port IDs to DataValue objects. The return value of this function
     // must also correspond to the output definitions you defined in the getOutputDefinitions function.
     async process(data, inputData, _context) {
-      const model = rivet.getInputOrData(data, inputData, "model");
-      if (!model)
+      const baseUrl = _context.getPluginConfig("oobaboogaBaseURL");
+      const api = new OobaboogaAPI(baseUrl);
+      let completed = await api.modelApi({ action: "unload" });
+      if (completed.result?.model_name == null) {
         return {
-          ["output"]: {
+          ["success"]: {
             type: "boolean",
             value: true
           }
         };
-      const api2 = new OobaboogaAPI();
-      let result = await api2.loadModel(model);
-      if (result == null) {
+      } else {
         return {
-          ["output"]: {
+          ["success"]: {
             type: "boolean",
             value: false
           }
         };
       }
-      return {
-        ["output"]: {
-          type: "boolean",
-          value: true
-        }
-      };
     }
   };
-  const oobaboogaLoadModelNode2 = rivet.pluginNodeDefinition(
-    OobaboogaLoadModelNodeImpl,
-    "Example Plugin Node"
+  const oobaboogaUnloadModelNode2 = rivet.pluginNodeDefinition(
+    OobaboogaUnloadModelNodeImpl,
+    "Oobabooga Unload Model Node"
   );
-  return oobaboogaLoadModelNode2;
+  return oobaboogaUnloadModelNode2;
 }
 
 // src/index.ts
@@ -554,21 +924,22 @@ var plugin = (rivet) => {
   const OobaboogaChatNode = oobaboogaChatNode(rivet);
   const OobaboogaLoadModelNode = oobaboogaLoadModelNode(rivet);
   const OoobaboogaLoadedModelNode = oobaboogaLoadedModelNode(rivet);
+  const OobaboogaUnloadModelNode = oobaboogaUnloadModelNode(rivet);
   const oobaboogaPlugin = {
     id: "oobabooga",
     name: "Oobabooga API",
     configSpec: {
-      oobaboogaAPIKey: {
-        type: "string",
-        label: "Oobabooga API Token",
-        description: "Your Oobabooga API Token.",
-        helperText: "Create at https://huggingface.co/settings/tokens"
-      },
+      // oobaboogaAPIKey: {
+      //   type: 'string',
+      //   label: 'Oobabooga API Token',
+      //   description: 'Your Oobabooga API Token.',
+      //   helperText: 'Create at https://huggingface.co/settings/tokens',
+      // },
       oobaboogaBaseURL: {
         type: "string",
         label: "Base URL",
-        description: "Your Oobabooga API Base URL.",
-        helperText: "Create at https://huggingface.co/settings/tokens"
+        description: "Your Oobabooga API Base URL",
+        helperText: "Default is http://localhost:5000"
       }
     },
     // contextMenuGroups: [
@@ -581,6 +952,7 @@ var plugin = (rivet) => {
       register(OobaboogaChatNode);
       register(OobaboogaLoadModelNode);
       register(OoobaboogaLoadedModelNode);
+      register(OobaboogaUnloadModelNode);
     }
   };
   return oobaboogaPlugin;

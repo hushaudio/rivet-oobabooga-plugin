@@ -3,6 +3,19 @@ Integrate Iron Clads' Rivet with the Oobabooga text generation Web UI.
 
 - Rivet Repository: [Iron Clads Rivet](https://github.com/Ironclad/rivet)
 
+## UPDATE
+Version 1.1 is now available. This version includes:
+
+### BaseURL Support 
+Settings option for the Oobabooga API base URL. This is useful for users who are serving the api on a different port or host than the default localhost:5000 of v1.02. 
+### Lora Loading
+You can now load loras with your models.
+
+Please note that when you load a model you need to load the LoRA with it, you cannot do them seperately.
+There are also some restrictions when using Llama2, I have needed to unload my Llama 2 models when I change a LoRA and only 1 LoRA works at a time.  Not tested with other models.
+
+## REMOVED: 
+Automatic Model List dropdown.  This has been removed for performance reasons.
 ## Installation
 Import the plugin using the following CDN link via the Rivet project settings:
 

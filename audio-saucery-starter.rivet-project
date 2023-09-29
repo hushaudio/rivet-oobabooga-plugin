@@ -1,0 +1,149 @@
+version: 4
+data:
+  attachedData:
+    trivet:
+      testSuites: []
+      version: 1
+  graphs:
+    NlzIiNP49a2c6VEN9ngFy:
+      metadata:
+        description: ""
+        id: NlzIiNP49a2c6VEN9ngFy
+        name: CTO
+      nodes:
+        '[13IMPP76gmKt_CNegS8R1]:userInput "User Input: Product To Create"':
+          data:
+            prompt: "##ASSISTANT \r
+
+              What product are we making today?"
+            useInput: false
+          outgoingConnections:
+            - questionsAndAnswers->"Text" g4PGU7GJktpr-QNbQMb8T/input
+          visualData: 564.4553679048871/417.5220554759328/488/6
+        '[g4PGU7GJktpr-QNbQMb8T]:text "Text"':
+          data:
+            text: "{{input}}"
+          visualData: 1310.6832897391728/492.2963464698924/349.62996678973013/8
+    dDkOuGKakJQg3DtjZx6jL:
+      metadata:
+        description: ""
+        id: dDkOuGKakJQg3DtjZx6jL
+        name: Load Coder Model
+      nodes:
+        '[1oqPl1SJPpQrw__Kk7Spj]:ifElse "If/Else"':
+          outgoingConnections:
+            - output->"Text" MPW9aXgAoS_nuV93UgrGT/input
+          visualData: 723/310/177/11
+        '[5TkOXn4llVuRfY478st1o]:oobaboogaLoadedModel "Oobabooga Loaded Model"':
+          data:
+            model: ""
+            prompt: ""
+          outgoingConnections:
+            - output->"Compare" wJp3a_9EFjnB97WdJp5py/a
+          visualData: -15.000030517578125/161.99998474121094/300/20
+        '[Fub5pUYFNlK8fQkSdvXIa]:graphInput "Model Name To Load"':
+          data:
+            dataType: string
+            id: model name
+            useDefaultValueInput: false
+          outgoingConnections:
+            - data->"Compare" wJp3a_9EFjnB97WdJp5py/b
+          visualData: -14.333404541015625/337.9999694824219/300/21
+        '[HWABaS_-VR9ZinslNF2vo]:oobaboogaLoadModel "Oobabooga Load Model"':
+          data:
+            model: ""
+          visualData: 110/661/300/null
+        '[MPW9aXgAoS_nuV93UgrGT]:text "Text"':
+          data:
+            text: "{{input}}"
+          outgoingConnections:
+            - output->"Graph Output" q82xJdeG6o8V6djc4FKqC/value
+          visualData: 1019/291.3333435058594/300/10
+        '[q82xJdeG6o8V6djc4FKqC]:graphOutput "Graph Output"':
+          data:
+            dataType: string
+            id: output
+          visualData: 1453/284.3332824707031/300/13
+        '[wJp3a_9EFjnB97WdJp5py]:compare "Compare"':
+          data:
+            comparisonFunction: ==
+          outgoingConnections:
+            - output->"If/Else" 1oqPl1SJPpQrw__Kk7Spj/false
+            - output->"If/Else" 1oqPl1SJPpQrw__Kk7Spj/if
+            - output->"If/Else" 1oqPl1SJPpQrw__Kk7Spj/true
+          visualData: 438/268/160/null
+    r0He-UGZTihfwMjSYBjjc:
+      metadata:
+        description: ""
+        id: r0He-UGZTihfwMjSYBjjc
+        name: Main Graph
+      nodes:
+        '[1bEUA54xzcvMpcUlyda29]:text "CoderModel"':
+          data:
+            text: TheBloke_Phind-CodeLlama-34B-v2-GPTQ
+          outgoingConnections:
+            - output->"Model Loader" UjBaMlfcHRSF58TFhQNHp/model name
+          visualData: 29.430969574367353/205.18854322037242/300/31
+        '[UjBaMlfcHRSF58TFhQNHp]:subGraph "Model Loader"':
+          data:
+            graphId: dDkOuGKakJQg3DtjZx6jL
+            useAsGraphPartialOutput: false
+            useErrorOutput: false
+          visualData: 378.48471670304906/205.76889512907184/430.9210876784841/41
+        '[cUaezL2qLNNQXtxM3NO5e]:text "Text"':
+          data:
+            text: tell me a story
+          outgoingConnections:
+            - output->"Oobabooga Chat" wBW2nIpc2pZsH_zbJjeJK/prompt
+          visualData: 798.4450713154918/566.2667179118326/300/42
+        '[dtROzXOPWUYkEneGRl_aL]:oobaboogaLoadModel "Oobabooga Load Model"':
+          data:
+            model: TheBloke_Phind-CodeLlama-34B-v2-GPTQ
+          visualData: 220/478/300/null
+        '[wBW2nIpc2pZsH_zbJjeJK]:oobaboogaChat "Oobabooga Chat"':
+          data:
+            add_bos_token: true
+            auto_max_new_tokens: false
+            ban_eos_token: false
+            do_sample: true
+            early_stopping: false
+            epsilon_cutoff: 0
+            eta_cutoff: 0
+            guidance_scale: 1
+            length_penalty: 1
+            max_new_tokens: 2048
+            max_tokens_second: 0
+            min_length: 0
+            mirostat_eta: 0.1
+            mirostat_mode: 0
+            mirostat_tau: 5
+            negative_prompt: ""
+            no_repeat_ngram_size: 0
+            num_beams: 1
+            penalty_alpha: 0
+            preset: None
+            prompt: Make sure you turn off the switch at the bottom to disable the prompt
+              input in order to use this text box!  You will know its working if
+              you see this in the node body.
+            repetition_penalty: 1.18
+            repetition_penalty_range: 0
+            seed: -1
+            skip_special_tokens: true
+            stopping_strings: []
+            temperature: 0.2
+            tfs: 1
+            top_a: 0
+            top_k: 40
+            top_p: 0.1
+            truncation_length: 2048
+            typical_p: 1
+            usePromptInput: true
+          visualData: 1112.6831265036114/566.3756837929076/300/47
+  metadata:
+    description: ""
+    id: jhTNgtVQnWNYFPsKzPd-x
+    title: Untitled Project
+  plugins:
+    - id: oobabooga
+      type: uri
+      uri: http://localhost:3000/oobabooga-rivet-v1_02.js

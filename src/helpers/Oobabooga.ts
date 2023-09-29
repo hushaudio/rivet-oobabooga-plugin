@@ -1,11 +1,12 @@
+type LoRAName = string
 export default class OobaboogaAPI {
   private HOST: string;
   private URI: string;
   public models: string[] = []
 
   constructor(host?: string) {
-      this.HOST = host || 'localhost:5000';
-      this.URI = `http://${this.HOST}/api/v1/generate`;
+      this.HOST = host || 'http://localhost:5000';
+      this.URI = `${this.HOST}/api/v1/generate`;
   }
 
   // Equivalent to the 'run' function in Python
@@ -29,7 +30,7 @@ export default class OobaboogaAPI {
   // Equivalent to the 'generate' function in Python
   async generate(prompt: string, tokens: number = 200): Promise<string | null> {
       const request = { prompt, max_new_tokens: tokens };
-      const response = await fetch(`http://${this.HOST}/api/v1/generate`, {
+      const response = await fetch(`${this.HOST}/api/v1/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(request),
@@ -45,7 +46,7 @@ export default class OobaboogaAPI {
 
   // Equivalent to the 'model_api' function in Python
   async modelApi(request: any): Promise<any> {
-      const response = await fetch(`http://${this.HOST}/api/v1/model`, {
+      const response = await fetch(`${this.HOST}/api/v1/model`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(request),
@@ -62,83 +63,98 @@ export default class OobaboogaAPI {
       return (await this.modelApi({ action: 'list' }))?.result;
   }
 
-  async loadModel(model_name: string): Promise<any> {
-      return this.modelApi({ action: 'load', model_name });
+  async loadModel(
+    model: string, 
+    args: LoadModelArgs): Promise<any> {
+        const guessGroupsize = (model_name: string): number => {
+            if (model_name.includes('1024g')) return 1024;
+            if (model_name.includes('128g')) return 128;
+            if (model_name.includes('32g')) return 32;
+            return -1;
+        };
+  
+        let req = {
+            action: 'load',
+            model_name: model,
+            args: Object.assign(defaultLoadArgs, args) as LoadModelArgs
+        };
+  
+        model = model.toLowerCase();
+  
+        if (model.includes('4bit') || model.includes('gptq') || model.includes('int4')) {
+            req.args.wbits = 4;
+            req.args.groupsize = guessGroupsize(model);
+        } else if (model.includes('3bit')) {
+            req.args.wbits = 3;
+            req.args.groupsize = guessGroupsize(model);
+        }
+  
+        if (model.includes('8bit')) {
+            req.args.load_in_8bit = true;
+        } else if (model.includes('-hf') || model.includes('fp16')) {
+            if (model.includes('7b')) {
+                req.args.bf16 = true;
+            } else if (model.includes('13b')) {
+                req.args.load_in_8bit = true;
+            }
+        } else if (model.includes('gguf')) {
+            if (model.includes('7b')) {
+                req.args.n_gpu_layers = 100;
+            } else if (model.includes('13b')) {
+                req.args.n_gpu_layers = 100;
+            } else if (model.includes('30b') || model.includes('33b')) {
+                req.args.n_gpu_layers = 59;
+            } else if (model.includes('65b')) {
+                req.args.n_gpu_layers = 42;
+            }
+        } else if (model.includes('rwkv')) {
+            req.args.rwkv_cuda_on = true;
+            if (model.includes('14b')) {
+                req.args.rwkv_strategy = 'cuda f16i8';
+            } else {
+                req.args.rwkv_strategy = 'cuda f16';
+            }
+        }
+  
+        return await this.modelApi(req);
   }
 
-  async complexModelLoad(model: string, args:LoadModelArgs): Promise<any> {
+  async complexModelLoad(model: string, args?:Partial<LoadModelArgs>): Promise<any> {
       // Function to guess group size
-      const guessGroupsize = (model_name: string): number => {
-          if (model_name.includes('1024g')) return 1024;
-          if (model_name.includes('128g')) return 128;
-          if (model_name.includes('32g')) return 32;
-          return -1;
-      };
-
-      let req = {
-          action: 'load',
-          model_name: model,
-          args: Object.assign(defaultLoadArgs, args) as LoadModelArgs
-      };
-
-      model = model.toLowerCase();
-
-      if (model.includes('4bit') || model.includes('gptq') || model.includes('int4')) {
-          req.args.wbits = 4;
-          req.args.groupsize = guessGroupsize(model);
-      } else if (model.includes('3bit')) {
-          req.args.wbits = 3;
-          req.args.groupsize = guessGroupsize(model);
-      }
-
-      if (model.includes('8bit')) {
-          req.args.load_in_8bit = true;
-      } else if (model.includes('-hf') || model.includes('fp16')) {
-          if (model.includes('7b')) {
-              req.args.bf16 = true;
-          } else if (model.includes('13b')) {
-              req.args.load_in_8bit = true;
-          }
-      } else if (model.includes('gguf')) {
-          if (model.includes('7b')) {
-              req.args.n_gpu_layers = 100;
-          } else if (model.includes('13b')) {
-              req.args.n_gpu_layers = 100;
-          } else if (model.includes('30b') || model.includes('33b')) {
-              req.args.n_gpu_layers = 59;
-          } else if (model.includes('65b')) {
-              req.args.n_gpu_layers = 42;
-          }
-      } else if (model.includes('rwkv')) {
-          req.args.rwkv_cuda_on = true;
-          if (model.includes('14b')) {
-              req.args.rwkv_strategy = 'cuda f16i8';
-          } else {
-              req.args.rwkv_strategy = 'cuda f16';
-          }
-      }
-
-      return await this.modelApi(req);
+      
   }
 }
 
+export type LoaderTypes = 'AutoGPTQ' | 'Transformers' | 'ExLlama' | 'ExLlama_HF' | 'GPTQ-for-LLaMa' | 'llama.cpp' | 'llamacpp_HF' | 'ctransformers'
 
 type LoadModelArgs = {
-    loader: 'AutoGPTQ' | 'Transformers' | 'ExLlama' | 'ExLlama_HF' | 'GPTQ-for-LLaMa' | 'llama.cpp' | 'llamacpp_HF' | 'ctransformers';
-    bf16: boolean;
-    load_in_8bit: boolean;
-    groupsize: number;
-    wbits: number;
-    threads: number;
-    n_batch: number;
-    no_mmap: boolean;
-    mlock: boolean;
-    cache_capacity: null | number;
-    n_gpu_layers: number;
-    n_ctx: number;
-    rwkv_strategy: null | string;
-    rwkv_cuda_on: boolean;
-}
+    lora: string[] | any;
+    mode: 'chat' | 'instruct' | any;
+    loader: LoaderTypes | any;
+    bf16: boolean | any;
+    load_in_8bit: boolean | any;
+    groupsize: number | any;
+    wbits: number | any;
+    threads: number | any;
+    n_batch: number | any;
+    no_mmap: boolean | any;
+    mlock: boolean | any;
+    cache_capacity: null | number | any;
+    n_gpu_layers: number | any;
+    n_ctx: number | any;
+    rwkv_strategy: null | string | any;
+    rwkv_cuda_on: boolean | any;
+    load_in_4bit: boolean | any;
+    compute_dtype: 'float16' | 'float32' | any;
+    quant_type: string | any;
+    use_double_quant: boolean | any;
+    cpu: boolean | any;
+    auto_devices: boolean | any;
+    gpu_memory: null | number | any;
+    cpu_memory: null | number | any;
+    disk: boolean | any;
+    disk_cache_dir: string | any;
+};
 
 type ChatRequestSettings = {
     prompt: string;
@@ -212,9 +228,10 @@ const defaultChatProps = {
 }
   
 const defaultLoadArgs = {
-    loader: 'AutoGPTQ',
+    loader: 'Transformers',
     bf16: false,
     load_in_8bit: false,
+    load_in_4bit: true,
     groupsize: 0,
     wbits: 0,
     threads: 0,
