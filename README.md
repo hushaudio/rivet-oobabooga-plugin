@@ -25,12 +25,12 @@ NOTE: There are times when I find the Oobabooga web UI can get buggy when loadin
 ## REMOVED:
 Automatic Model List dropdown has been removed for performance reasons. Now, simply enter the name of the model you wish to load, exactly as it appears in the Oobabooga web UI. Note that the input is case-sensitive.
 
-## Installation
+<!-- ## Installation
 Import the plugin using the following CDN link via the Rivet project settings:
 
 ```plaintext
 https://cdn.jsdelivr.net/gh/hushaudio/rivet-oobabooga-plugin@main/dist/oobabooga-rivet-v1_1.js
-```
+``` -->
 
 ## Usage
 This plugin facilitates communication with the Oobabooga text generation Web UI via its built-in API. Click on the "Apply flags/extensions and restart" button.
