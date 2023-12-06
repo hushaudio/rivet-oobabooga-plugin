@@ -1,6 +1,7 @@
 {
   "name": "rivet-oobabooga-plugin",
-  "version": "1.1.2",
+  "version": "1.1.3",
+  "main": "dist/oobabooga-rivet-v1_1.js",
   "files": [
     "dist/oobabooga-rivet-v1_1.js"
   ],
