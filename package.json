@@ -23,5 +23,8 @@
   },
   "volta": {
     "node": "20.6.1"
+  },
+  "rivet": {
+    "skipInstall": true
   }
 }
