@@ -1,11 +1,11 @@
 # Rivet Oobabooga Plugin
 
-### WARNING
-This repo is not up to date with the latest oobabooga since their update to their api.  This uses the old api format before the recent changes.
-
 Integrate Iron Clads' Rivet with the Oobabooga text generation Web UI.
 
 - Rivet Repository: [Iron Clads Rivet](https://github.com/Ironclad/rivet)
+
+### WARNING
+This repo is not up to date with the latest oobabooga since their update to their api.  This uses the old api format before the recent changes.
 
 ## UPDATE
 Version 1.1 is now available. This version includes:
